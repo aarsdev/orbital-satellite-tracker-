@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,6 +193,27 @@ h1{font-size:clamp(27px,3vw,42px);margin:9px 0 6px;letter-spacing:-1.7px}
 }
 .creator{color:var(--cyan);font-size:12px;letter-spacing:1px}
 .refresh-btn{color:var(--cyan)}
+
+/* Simulation-time controls — styled to match the original ORBITAL panel */
+.time-control{
+  position:absolute;top:48px;right:14px;width:min(260px,calc(100% - 28px));
+  padding:12px;background:#080e19dd;border:1px solid #26374d;
+  border-radius:8px;backdrop-filter:blur(10px);pointer-events:auto
+}
+.time-control-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.time-control-title{font:9px "DM Mono";letter-spacing:1px;color:var(--muted)}
+.time-speed-value{font:11px "DM Mono";color:var(--cyan)}
+.time-readout{font:9px "DM Mono";color:#b8c9df;margin-top:8px;white-space:nowrap}
+.time-slider{width:100%;margin:10px 0 4px;accent-color:var(--cyan);cursor:pointer}
+.time-control-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.time-scale{font:9px "DM Mono";color:var(--muted)}
+.time-reset{background:#111d2e;border:1px solid #293b53;color:#c7d8ee;
+  padding:5px 8px;border-radius:5px;font-size:9px}
+.time-reset:hover{border-color:var(--cyan);color:white}
+@media(max-width:600px){
+  .time-control{top:45px;right:8px;width:205px;padding:9px}
+  .time-readout{font-size:8px}
+}
 @media(max-width:1000px){
   .layout{grid-template-columns:1fr}
   .globe-wrap{height:480px}
@@ -295,6 +315,22 @@ h1{font-size:clamp(27px,3vw,42px);margin:9px 0 6px;letter-spacing:-1.7px}
       <canvas id="globe"></canvas>
       <div class="globe-overlay">
         <div class="globe-tag">EARTH <span>/ 3D VIEW</span></div>
+
+        <div class="time-control" aria-label="Orbital simulation time controls">
+          <div class="time-control-head">
+            <span class="time-control-title">SIMULATION SPEED</span>
+            <strong class="time-speed-value" id="timeSpeedValue">1.0× · REAL TIME</strong>
+          </div>
+          <div class="time-readout" id="simulationTimeReadout" aria-live="off">SIM UTC —</div>
+          <input class="time-slider" id="timeSpeed" type="range"
+                 min="0" max="10" step="0.5" value="1"
+                 aria-label="Simulation speed multiplier">
+          <div class="time-control-bottom">
+            <span class="time-scale">0× PAUSE&nbsp;&nbsp; · &nbsp;&nbsp;10× FAST</span>
+            <button class="time-reset" id="resetTime" type="button">RESET · 1×</button>
+          </div>
+        </div>
+
         <div class="hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
         <div class="globe-actions">
           <button class="small-btn" id="resetView">RESET VIEW</button>
@@ -516,6 +552,31 @@ let activeFilter="all";
 let autoSpin=false;
 let orbitLine=null;
 let validPositionCount=0;
+
+// Simulation time starts at the real current time. At 1× it advances at
+// exactly the same rate as the real clock; 0× pauses only orbital propagation.
+let simulationTime=Date.now();
+let simulationSpeed=1;
+let lastSimulationTick=performance.now();
+
+function updateSimulationReadout(){
+  const speedText=simulationSpeed===0
+    ?"0× · PAUSED"
+    :simulationSpeed===1
+      ?"1.0× · REAL TIME"
+      :`${simulationSpeed.toFixed(1)}× · SIMULATION`;
+  $("timeSpeedValue").textContent=speedText;
+  $("simulationTimeReadout").textContent=
+    "SIM UTC "+new Date(simulationTime).toISOString().replace("T"," ").slice(0,19);
+}
+
+function advanceSimulationTime(){
+  const tick=performance.now();
+  const elapsed=Math.max(0,tick-lastSimulationTick);
+  simulationTime+=elapsed*simulationSpeed;
+  lastSimulationTick=tick;
+  updateSimulationReadout();
+}
 
 const colors={
   station:0x51d9f4,
@@ -754,7 +815,7 @@ function addObjects(records,source){
   return added;
 }
 
-function positionOf(record,date=new Date()){
+function positionOf(record,date=new Date(simulationTime)){
   try{
     const pv=satellite.propagate(record.satrec,date);
     if(!pv||!pv.position||typeof pv.position==="boolean")return null;
@@ -773,7 +834,8 @@ function positionOf(record,date=new Date()){
 }
 
 function updatePositions(){
-  const now=new Date();
+  advanceSimulationTime();
+  const now=new Date(simulationTime);
   let valid=0;
 
   for(const record of objects){
@@ -873,7 +935,7 @@ function updateDetail(o){
 
 function selectObject(o){
   selected=o;
-  if(!o.position)o.position=positionOf(o,new Date());
+  if(!o.position)o.position=positionOf(o,new Date(simulationTime));
   renderList();
   updateDetail(o);
   $("topAltitude").textContent=o.position
@@ -889,7 +951,7 @@ function showOrbit(o){
   }
 
   const points=[];
-  const start=new Date();
+  const start=new Date(simulationTime);
   for(let i=0;i<=90;i++){
     const time=new Date(start.getTime()+i*60000);
     const p=positionOf(o,time);
@@ -1004,6 +1066,24 @@ async function loadSpaceWeather(){
 
 $("search").addEventListener("input",renderList);
 
+$("timeSpeed").addEventListener("input",event=>{
+  advanceSimulationTime();
+  simulationSpeed=Number(event.target.value);
+  updateSimulationReadout();
+  updatePositions();
+  if(selected&&orbitLine)showOrbit(selected);
+});
+
+$("resetTime").addEventListener("click",()=>{
+  simulationTime=Date.now();
+  simulationSpeed=1;
+  lastSimulationTick=performance.now();
+  $("timeSpeed").value="1";
+  updateSimulationReadout();
+  updatePositions();
+  if(selected&&orbitLine)showOrbit(selected);
+});
+
 document.querySelectorAll(".filter").forEach(button=>{
   button.addEventListener("click",()=>{
     document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));
@@ -1078,6 +1158,7 @@ function updateClocks(){
 }
 
 updateClocks();
+updateSimulationReadout();
 updatePositions();
 updateCounts();
 loadLiveData();
