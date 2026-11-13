@@ -557,13 +557,14 @@ function categoryFor(name,group=""){
   return "other";
 }
 
-function latLonVector(lat,lon,radius){
-  const a=lat*Math.PI/180;
-  const b=lon*Math.PI/180;
+function latLonVector(lat, lon, radius) {
+  const latRad = lat * Math.PI / 180;
+  const lonRad = lon * Math.PI / 180;
+
   return new THREE.Vector3(
-    -radius*Math.cos(a)*Math.sin(b),
-    radius*Math.sin(a),
-    radius*Math.cos(a)*Math.cos(b)
+    radius * Math.cos(latRad) * Math.cos(lonRad),
+    radius * Math.sin(latRad),
+    -radius * Math.cos(latRad) * Math.sin(lonRad)
   );
 }
 
