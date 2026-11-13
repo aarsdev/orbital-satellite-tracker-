@@ -1,498 +1,4 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#070b14">
-<meta name="description" content="ORBITAL — Explore Earth, track satellites and monitor space weather through a global space intelligence dashboard.">
-<title>ORBITAL — Global Space Intelligence</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#070b14;
-  --panel:#0d1422;
-  --panel2:#111c2d;
-  --line:#1c2a40;
-  --text:#eaf2ff;
-  --muted:#8192aa;
-  --cyan:#51d9f4;
-  --green:#50e3a4;
-  --orange:#ffb66d;
-  --purple:#a991ff;
-  --red:#ff737d;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:Inter,Arial,sans-serif;overflow-x:hidden
-}
-button,input{font:inherit}
-button{cursor:pointer}
-a{color:inherit;text-decoration:none}
-header{
-  height:70px;border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;background:#080e19;
-  position:sticky;top:0;z-index:20;
-  backdrop-filter:blur(14px)
-}
-.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:3px;font-size:17px}
-.logo{
-  width:36px;height:36px;border:1px solid var(--cyan);
-  border-radius:50%;display:grid;place-items:center;
-  color:var(--cyan);box-shadow:0 0 18px #51d9f433;
-  font-size:22px
-}
-.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:3px;font-weight:500}
-.header-right{display:flex;align-items:center;gap:20px}
-.live{font:11px "DM Mono";color:var(--green);letter-spacing:1px}
-.live:before{
-  content:"";display:inline-block;width:7px;height:7px;
-  background:var(--green);border-radius:50%;margin-right:8px;
-  box-shadow:0 0 10px var(--green)
-}
-.utc{font:12px "DM Mono";color:var(--muted)}
-nav{
-  display:flex;gap:20px;align-items:center;
-  padding:0 28px;height:42px;border-bottom:1px solid var(--line);
-  background:#090f1b;overflow-x:auto;white-space:nowrap;
-  scrollbar-width:none
-}
-nav a{font-size:10px;color:var(--muted);letter-spacing:1px}
-nav a:hover{color:var(--cyan)}
-main{max-width:1600px;margin:auto;padding:25px 28px 50px}
-.eyebrow{color:var(--cyan);font:10px "DM Mono";letter-spacing:2px}
-h1{font-size:clamp(27px,3vw,42px);margin:9px 0 6px;letter-spacing:-1.7px}
-.subtitle{color:var(--muted);font-size:13px;line-height:1.8;max-width:720px}
-.section-title{font-size:14px;font-weight:700;letter-spacing:1px}
-.section-sub{font:10px "DM Mono";color:var(--muted);margin-top:5px}
-.section-heading{margin:34px 0 14px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:25px 0}
-.stat{
-  background:linear-gradient(145deg,#101c2d,#0b1320);
-  border:1px solid var(--line);padding:17px 18px;
-  border-radius:10px;min-width:0
-}
-.stat-label{font:10px "DM Mono";color:var(--muted);letter-spacing:1px}
-.stat-value{font-size:26px;font-weight:700;margin-top:10px}
-.stat-note{font-size:10px;color:var(--muted);margin-top:5px}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:15px}
-.panel,.bottom-panel{
-  background:var(--panel);border:1px solid var(--line);
-  border-radius:12px;overflow:hidden
-}
-.panel-head{
-  padding:15px 17px;border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;gap:10px
-}
-.panel-title{font-size:12px;font-weight:700;letter-spacing:1px}
-.panel-sub{font:10px "DM Mono";color:var(--muted);margin-top:4px}
-.globe-wrap{
-  height:570px;position:relative;
-  background:radial-gradient(ellipse at 50% 48%,#142b45 0%,#080e1a 52%,#050912 100%)
-}
-#globe{width:100%;height:100%;display:block}
-.globe-overlay{position:absolute;pointer-events:none;inset:0}
-.hint{
-  position:absolute;bottom:17px;left:18px;color:#8ca1bc;
-  font:10px "DM Mono";background:#080e19bb;padding:9px 12px;
-  border:1px solid #26374d;border-radius:6px
-}
-.globe-tag{position:absolute;top:15px;left:17px;font:10px "DM Mono";color:var(--cyan);letter-spacing:1px}
-.globe-tag span{color:var(--muted)}
-.globe-actions{
-  position:absolute;right:14px;bottom:15px;
-  display:flex;gap:7px;pointer-events:auto
-}
-.small-btn,.action-btn{
-  background:#111d2e;border:1px solid #293b53;color:#c7d8ee;
-  padding:8px 11px;border-radius:6px;font-size:10px
-}
-.small-btn:hover,.action-btn:hover{border-color:var(--cyan);color:white}
-.status-line{display:flex;align-items:center;gap:8px;font:10px "DM Mono";color:var(--muted)}
-.status-dot{width:7px;height:7px;background:var(--orange);border-radius:50%;flex:none}
-.status-dot.ok{background:var(--green)}
-.side-panel{display:flex;flex-direction:column;min-height:0}
-.search{padding:13px;border-bottom:1px solid var(--line)}
-.search input{
-  width:100%;background:#080f1b;border:1px solid #26364c;
-  padding:11px 12px;color:white;border-radius:6px;outline:none;font-size:12px
-}
-.search input:focus{border-color:var(--cyan)}
-.filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.filter{
-  background:#111c2b;color:var(--muted);border:1px solid var(--line);
-  padding:6px 9px;border-radius:5px;font-size:9px
-}
-.filter.active{color:var(--cyan);border-color:#2b8196;background:#102633}
-.sat-list{overflow:auto;max-height:335px;padding:5px 10px}
-.sat-row{
-  padding:11px 8px;border-bottom:1px solid #1b293a;
-  display:flex;align-items:center;gap:10px;cursor:pointer
-}
-.sat-row:hover,.sat-row.selected{background:#142238}
-.dot{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 9px currentColor}
-.sat-info{min-width:0;flex:1}
-.sat-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sat-meta{font:9px "DM Mono";color:var(--muted);margin-top:4px}
-.sat-alt{font:10px "DM Mono";color:#a6bad0;white-space:nowrap}
-.detail{border-top:1px solid var(--line);padding:14px}
-.detail-head{display:flex;align-items:center;justify-content:space-between}
-.detail-name{font-size:13px;font-weight:700}
-.detail-id{font:9px "DM Mono";color:var(--muted);margin-top:4px}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.detail-item label{display:block;font:9px "DM Mono";color:var(--muted);margin-bottom:5px}
-.detail-item strong{font:12px "DM Mono";font-weight:500}
-.detail-empty{font-size:11px;color:var(--muted);line-height:1.7;padding:13px 0}
-.upload-label{
-  display:inline-block;background:#111d2e;border:1px solid #293b53;
-  padding:8px 10px;border-radius:6px;font-size:10px;cursor:pointer
-}
-.upload-label input{display:none}
-.bottom-panel{margin-top:15px}
-.world-clocks{display:grid;grid-template-columns:repeat(4,1fr)}
-.clock{padding:17px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.clock-city{font-size:11px;font-weight:600}
-.clock-country{font-size:9px;color:var(--muted);margin-top:4px}
-.clock-time{font:19px "DM Mono";margin-top:12px;color:var(--cyan)}
-.clock-date{font:9px "DM Mono";color:var(--muted);margin-top:4px}
-.facts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:17px}
-.fact{background:#111c2b;border:1px solid var(--line);border-radius:8px;padding:16px}
-.fact h3{font-size:12px;color:var(--cyan);margin:0 0 9px}
-.fact p{color:var(--muted);font-size:11px;line-height:1.8;margin:0}
-.weather-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:15px}
-.weather-card{
-  background:#111c2b;border:1px solid var(--line);
-  border-radius:9px;padding:17px;min-height:120px
-}
-.weather-label{font:10px "DM Mono";color:var(--muted);letter-spacing:1px}
-.weather-value{font-size:25px;font-weight:700;margin-top:13px}
-.weather-note{font-size:10px;color:var(--muted);margin-top:7px;line-height:1.6}
-.launch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:15px}
-.launch-card{background:#111c2b;border:1px solid var(--line);border-radius:9px;padding:17px}
-.launch-card h3{font-size:12px;color:var(--cyan);margin:0 0 10px}
-.launch-card p{font-size:11px;color:var(--muted);line-height:1.7;margin:0}
-.launch-tag{display:inline-block;font:9px "DM Mono";color:var(--green);margin-top:12px}
-.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.feature{
-  background:linear-gradient(145deg,#101c2d,#0b1320);
-  border:1px solid var(--line);border-radius:10px;padding:18px
-}
-.feature-icon{font-size:22px;color:var(--cyan)}
-.feature h3{font-size:12px;margin:12px 0 7px}
-.feature p{font-size:10px;line-height:1.8;color:var(--muted);margin:0}
-.loading{padding:25px 10px;text-align:center;color:var(--muted);font:10px "DM Mono";line-height:1.8}
-.footer-note{
-  color:var(--muted);font:10px "DM Mono";line-height:1.9;
-  margin-top:30px;text-align:center
-}
-.creator{color:var(--cyan);font-size:12px;letter-spacing:1px}
-.refresh-btn{color:var(--cyan)}
-@media(max-width:1000px){
-  .layout{grid-template-columns:1fr}
-  .globe-wrap{height:480px}
-  .sat-list{max-height:270px}
-}
-@media(max-width:700px){
-  .facts-grid,.feature-grid{grid-template-columns:1fr 1fr}
-  .weather-grid,.launch-grid{grid-template-columns:1fr 1fr}
-}
-@media(max-width:600px){
-  header{padding:0 14px;height:60px}
-  .header-right{gap:9px}.utc{display:none}
-  nav{padding:0 14px;gap:17px}
-  main{padding:20px 12px 35px}
-  .stats{grid-template-columns:1fr 1fr;gap:8px}
-  .stat{padding:13px}.stat-value{font-size:21px}
-  .globe-wrap{height:370px}
-  .world-clocks{grid-template-columns:1fr 1fr}
-  .clock:nth-child(2n){border-right:0}
-  .weather-grid,.launch-grid{grid-template-columns:1fr 1fr}
-}
-@media(max-width:420px){
-  .facts-grid,.feature-grid{grid-template-columns:1fr}
-  .globe-actions{right:8px;bottom:8px}
-  .small-btn{padding:7px;font-size:9px}
-  .weather-grid,.launch-grid{grid-template-columns:1fr}
-}
-</style>
-</head>
-
-<body>
-<header>
-  <div class="brand">
-    <div class="logo">◉</div>
-    <div>ORBITAL<small>GLOBAL SPACE INTELLIGENCE</small></div>
-  </div>
-  <div class="header-right">
-    <span class="live" id="liveLabel">INITIALIZING</span>
-    <span class="utc" id="headerUtc">UTC --:--:--</span>
-  </div>
-</header>
-
-<nav>
-  <a href="#overview">OVERVIEW</a>
-  <a href="#earth">EARTH TRACKER</a>
-  <a href="#satellites">SATELLITES</a>
-  <a href="#weather">SPACE WEATHER</a>
-  <a href="#clocks-section">WORLD CLOCKS</a>
-  <a href="#missions">SPACE KNOWLEDGE</a>
-</nav>
-
-<main>
-<section id="overview">
-  <div class="eyebrow">SPACE SITUATIONAL AWARENESS / EARTH ORBIT</div>
-  <h1>Explore the world above us.</h1>
-  <div class="subtitle">
-    An independent space intelligence dashboard. Explore Earth's orbital
-    environment, discover satellites, monitor solar activity and view
-    worldwide time zones.
-  </div>
-
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-label">OBJECTS LOADED</div>
-      <div class="stat-value" id="totalCount">—</div>
-      <div class="stat-note">Unique orbital records</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">VALID POSITIONS</div>
-      <div class="stat-value" id="visibleCount">—</div>
-      <div class="stat-note">Successfully calculated</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">SELECTED ALTITUDE</div>
-      <div class="stat-value" id="topAltitude">—</div>
-      <div class="stat-note">Above Earth's surface</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">LAST DATA UPDATE</div>
-      <div class="stat-value" id="lastUpdate" style="font-size:17px">Waiting</div>
-      <div class="stat-note" id="dataSource">Connecting to data sources</div>
-    </div>
-  </section>
-</section>
-
-<section class="layout" id="earth">
-  <div class="panel">
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">EARTH / ORBITAL VIEW</div>
-        <div class="panel-sub">3D GLOBE · CITY MARKERS · SATELLITE POSITIONS</div>
-      </div>
-      <div class="status-line">
-        <span class="status-dot" id="feedDot"></span>
-        <span id="feedStatus">CONNECTING</span>
-      </div>
-    </div>
-    <div class="globe-wrap">
-      <canvas id="globe"></canvas>
-      <div class="globe-overlay">
-        <div class="globe-tag">EARTH <span>/ 3D VIEW</span></div>
-        <div class="hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
-        <div class="globe-actions">
-          <button class="small-btn" id="resetView">RESET VIEW</button>
-          <button class="small-btn" id="toggleSpin">AUTO ROTATE: OFF</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <aside class="panel side-panel" id="satellites">
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">OBJECT CATALOG</div>
-        <div class="panel-sub">SEARCH AND SELECT AN OBJECT</div>
-      </div>
-      <label class="upload-label">
-        ＋ IMPORT TLE
-        <input type="file" id="tleUpload" accept=".txt,.tle,.dat">
-      </label>
-    </div>
-    <div class="search">
-      <input id="search" placeholder="Search name or NORAD catalog ID...">
-      <div class="filters">
-        <button class="filter active" data-filter="all">ALL</button>
-        <button class="filter" data-filter="station">STATIONS</button>
-        <button class="filter" data-filter="starlink">STARLINK</button>
-        <button class="filter" data-filter="gps">GPS</button>
-        <button class="filter" data-filter="weather">WEATHER</button>
-        <button class="filter" data-filter="geo">GEO</button>
-        <button class="filter" data-filter="other">OTHER</button>
-      </div>
-    </div>
-    <div class="sat-list" id="satList">
-      <div class="loading">AWAITING ORBITAL DATA<br>Connecting to CelesTrak...</div>
-    </div>
-    <div class="detail" id="detail">
-      <div class="detail-empty">Select an object to inspect its calculated position, altitude, velocity and orbital characteristics.</div>
-    </div>
-  </aside>
-</section>
-
-<section id="weather" class="bottom-panel">
-  <div class="panel-head">
-    <div>
-      <div class="panel-title">SPACE WEATHER OBSERVATORY</div>
-      <div class="panel-sub">NOAA SPACE WEATHER PREDICTION CENTER · PUBLIC DATA</div>
-    </div>
-    <button class="small-btn refresh-btn" id="refreshWeather">↻ REFRESH DATA</button>
-  </div>
-  <div class="weather-grid">
-    <div class="weather-card">
-      <div class="weather-label">SOLAR WIND SPEED</div>
-      <div class="weather-value" id="solarSpeed">—</div>
-      <div class="weather-note" id="solarSpeedNote">Waiting for NOAA data</div>
-    </div>
-    <div class="weather-card">
-      <div class="weather-label">SOLAR WIND DENSITY</div>
-      <div class="weather-value" id="solarDensity">—</div>
-      <div class="weather-note" id="solarDensityNote">Waiting for NOAA data</div>
-    </div>
-    <div class="weather-card">
-      <div class="weather-label">PLANETARY K-INDEX</div>
-      <div class="weather-value" id="kpIndex">—</div>
-      <div class="weather-note" id="kpNote">Waiting for NOAA data</div>
-    </div>
-  </div>
-  <div class="panel-head">
-    <div>
-      <div class="panel-title">SPACE WEATHER INFORMATION</div>
-      <div class="panel-sub">UNDERSTANDING SOLAR AND GEOMAGNETIC CONDITIONS</div>
-    </div>
-  </div>
-  <div class="facts-grid">
-    <article class="fact">
-      <h3>SOLAR WIND</h3>
-      <p>A stream of charged particles released by the Sun. Its speed and density can influence Earth's space environment.</p>
-    </article>
-    <article class="fact">
-      <h3>GEOMAGNETIC ACTIVITY</h3>
-      <p>The K-index describes disturbances in Earth's magnetic field. Higher values indicate stronger geomagnetic activity.</p>
-    </article>
-    <article class="fact">
-      <h3>AURORAS</h3>
-      <p>Interactions between charged particles and Earth's upper atmosphere can create colourful auroras near the polar regions.</p>
-    </article>
-  </div>
-</section>
-
-<section id="clocks-section" class="bottom-panel">
-  <div class="panel-head">
-    <div>
-      <div class="panel-title">WORLD LOCATIONS & LOCAL CLOCKS</div>
-      <div class="panel-sub">GEOGRAPHIC REFERENCE LOCATIONS · AUTOMATIC TIME-ZONE UPDATES</div>
-    </div>
-    <div class="status-line">LIVE LOCAL TIME</div>
-  </div>
-  <div class="world-clocks" id="clocks"></div>
-</section>
-
-<section id="missions" class="bottom-panel">
-  <div class="panel-head">
-    <div>
-      <div class="panel-title">SPACE KNOWLEDGE BASE</div>
-      <div class="panel-sub">DISCOVER THE SCIENCE BEHIND EARTH ORBIT</div>
-    </div>
-  </div>
-  <div class="facts-grid">
-    <article class="fact">
-      <h3>THE ISS</h3>
-      <p>The International Space Station travels around Earth roughly every 90 minutes, completing about 16 orbits each day.</p>
-    </article>
-    <article class="fact">
-      <h3>STARLINK</h3>
-      <p>Starlink satellites operate in low Earth orbit and form a network designed to provide broadband internet connectivity.</p>
-    </article>
-    <article class="fact">
-      <h3>GPS</h3>
-      <p>GPS satellites orbit Earth at an altitude of approximately 20,200 kilometres.</p>
-    </article>
-    <article class="fact">
-      <h3>WEATHER WATCH</h3>
-      <p>Weather satellites help scientists observe clouds, storms, atmospheric conditions and changing weather patterns.</p>
-    </article>
-    <article class="fact">
-      <h3>GEOSTATIONARY ORBIT</h3>
-      <p>A geostationary satellite circles Earth above the equator once per sidereal day, appearing nearly fixed over one longitude.</p>
-    </article>
-    <article class="fact">
-      <h3>EARTH OBSERVATION</h3>
-      <p>Earth-observation satellites collect information about oceans, forests, ice, agriculture and land surfaces.</p>
-    </article>
-    <article class="fact">
-      <h3>LOW EARTH ORBIT</h3>
-      <p>Low Earth orbit is commonly used by imaging, research and communications satellites.</p>
-    </article>
-    <article class="fact">
-      <h3>ORBITAL DEBRIS</h3>
-      <p>Old spacecraft and fragments can remain in orbit. Tracking objects helps support space situational awareness.</p>
-    </article>
-    <article class="fact">
-      <h3>THE MOON</h3>
-      <p>The Moon is Earth's natural satellite. It takes about 27.3 days to orbit Earth relative to the stars.</p>
-    </article>
-  </div>
-</section>
-
-<section class="section-heading">
-  <div class="eyebrow">THE ORBITAL PLATFORM</div>
-  <div class="section-title" style="font-size:20px;margin-top:7px">A window into our space environment.</div>
-  <div class="subtitle">Explore the tools and data that power this independent space intelligence project.</div>
-</section>
-
-<section class="feature-grid">
-  <article class="feature">
-    <div class="feature-icon">◎</div>
-    <h3>3D EARTH VISUALIZATION</h3>
-    <p>Explore a textured globe with geographic reference markers and a rotating orbital environment.</p>
-  </article>
-  <article class="feature">
-    <div class="feature-icon">◉</div>
-    <h3>SATELLITE CATALOG</h3>
-    <p>Search public orbital records and inspect calculated satellite positions and orbital details.</p>
-  </article>
-  <article class="feature">
-    <div class="feature-icon">⌁</div>
-    <h3>ORBITAL PATHS</h3>
-    <p>Preview an estimated future orbital ground path based on published orbital elements.</p>
-  </article>
-  <article class="feature">
-    <div class="feature-icon">☼</div>
-    <h3>SPACE WEATHER</h3>
-    <p>View public solar wind and geomagnetic activity measurements from NOAA.</p>
-  </article>
-  <article class="feature">
-    <div class="feature-icon">◷</div>
-    <h3>GLOBAL TIME</h3>
-    <p>Compare local times across major cities using browser-supported time-zone data.</p>
-  </article>
-  <article class="feature">
-    <div class="feature-icon">✦</div>
-    <h3>SPACE EDUCATION</h3>
-    <p>Learn about satellites, orbital environments, Earth observation and the science of space.</p>
-  </article>
-</section>
-
-<footer class="footer-note">
-  DATA: CELESTRAK PUBLIC GP/TLE CATALOG · POSITION MODEL: SGP4<br>
-  SPACE WEATHER: NOAA SPACE WEATHER PREDICTION CENTER<br>
-  CITY LOCATIONS: GEOGRAPHIC REFERENCE COORDINATES · CLOCKS: IANA TIME ZONES<br>
-  ORBITAL ELEMENTS ARE NOT DIRECT GPS TRACKING. POSITIONS ARE PROPAGATED ESTIMATES.<br>
-  DATA AGE AND MODEL ACCURACY AFFECT PRECISION. NOT FOR NAVIGATION OR COLLISION AVOIDANCE.<br><br>
-  ORBITAL — INDEPENDENT SPACE EXPLORATION PROJECT<br>
-  NOT AFFILIATED WITH NASA, NOAA, CELESTRAK OR SATELLITE OPERATORS.<br><br>
-  <span class="creator">CREATED BY AARUSH BALAMURUGAN</span><br>
-  © 2026 ORBITAL · GLOBAL SPACE INTELLIGENCE
-</footer>
-</main>
-
 <script type="importmap">
 {
   "imports":{
@@ -508,25 +14,31 @@ import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import * as satellite from "satellite.js";
 
-const $=id=>document.getElementById(id);
-const canvas=$("globe");
-const objects=[];
-let selected=null;
-let activeFilter="all";
-let autoSpin=false;
-let orbitLine=null;
-let validPositionCount=0;
+const $ = id => document.getElementById(id);
 
-const colors={
-  station:0x51d9f4,
-  starlink:0xffdf70,
-  gps:0xa991ff,
-  weather:0x50e3a4,
-  geo:0xffb66d,
-  other:0x83a4c9
+const canvas = $("globe");
+const objects = [];
+
+let selected = null;
+let activeFilter = "all";
+let autoSpin = false;
+let orbitLine = null;
+let selectedMarker = null;
+let validPositionCount = 0;
+let satelliteLayers = {};
+
+const colors = {
+  station: 0x51d9f4,
+  starlink: 0xffdf70,
+  gps: 0xa991ff,
+  weather: 0x50e3a4,
+  geo: 0xffb66d,
+  oneweb: 0xff8c69,
+  iridium: 0xd18cff,
+  other: 0x83a4c9
 };
 
-const cities=[
+const cities = [
   {name:"NEW YORK",country:"United States",lat:40.7128,lon:-74.0060,tz:"America/New_York"},
   {name:"LOS ANGELES",country:"United States",lat:34.0522,lon:-118.2437,tz:"America/Los_Angeles"},
   {name:"TORONTO",country:"Canada",lat:43.6532,lon:-79.3832,tz:"America/Toronto"},
@@ -545,21 +57,58 @@ const cities=[
   {name:"SYDNEY",country:"Australia",lat:-33.8688,lon:151.2093,tz:"Australia/Sydney"}
 ];
 
-function categoryFor(name,group=""){
-  const n=name.toUpperCase();
-  if(group==="stations"||n.includes("ISS")||n.includes("TIANGONG"))return "station";
-  if(group==="starlink"||n.includes("STARLINK"))return "starlink";
-  if(group==="gps-ops"||n.includes("GPS")||n.includes("NAVSTAR"))return "gps";
-  if(group==="weather"||group==="noaa"||group==="goes"||
-     n.includes("WEATHER")||n.includes("NOAA")||
-     n.includes("METEOR")||n.includes("GOES"))return "weather";
-  if(group==="geo"||n.includes("INTELSAT"))return "geo";
+function categoryFor(name, group = "") {
+  const n = name.toUpperCase();
+  const g = group.toLowerCase();
+
+  if (
+    g === "stations" ||
+    n.includes("ISS") ||
+    n.includes("TIANGONG")
+  ) return "station";
+
+  if (g === "starlink" || n.includes("STARLINK")) {
+    return "starlink";
+  }
+
+  if (g === "oneweb" || n.includes("ONEWEB")) {
+    return "oneweb";
+  }
+
+  if (
+    g === "iridium-next" ||
+    n.includes("IRIDIUM")
+  ) return "iridium";
+
+  if (
+    g === "gps-ops" ||
+    n.includes("GPS") ||
+    n.includes("NAVSTAR")
+  ) return "gps";
+
+  if (
+    g === "weather" ||
+    g === "noaa" ||
+    g === "goes" ||
+    n.includes("WEATHER") ||
+    n.includes("NOAA") ||
+    n.includes("METEOR") ||
+    n.includes("GOES")
+  ) return "weather";
+
+  if (
+    g === "geo" ||
+    n.includes("INTELSAT")
+  ) return "geo";
+
   return "other";
 }
 
+/* One consistent coordinate system for the entire globe. */
+
 function latLonVector(lat, lon, radius) {
-  const latRad = lat * Math.PI / 180;
-  const lonRad = lon * Math.PI / 180;
+  const latRad = THREE.MathUtils.degToRad(lat);
+  const lonRad = THREE.MathUtils.degToRad(lon);
 
   return new THREE.Vector3(
     radius * Math.cos(latRad) * Math.cos(lonRad),
@@ -567,537 +116,1001 @@ function latLonVector(lat, lon, radius) {
     -radius * Math.cos(latRad) * Math.sin(lonRad)
   );
 }
+
 function satelliteLatLonVector(lat, lon, radius) {
-  const latRad = lat * Math.PI / 180;
-  const lonRad = lon * Math.PI / 180;
-
-  return new THREE.Vector3(
-    -radius * Math.cos(latRad) * Math.sin(lonRad),
-    radius * Math.sin(latRad),
-    radius * Math.cos(latRad) * Math.cos(lonRad)
-  );
+  return latLonVector(lat, lon, radius);
 }
-function createScene(){
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(42,1,0.1,1000);
-  camera.position.set(0,0.4,3.5);
 
-  const renderer=new THREE.WebGLRenderer({
-    canvas,antialias:true,alpha:true
+/* THREE.JS SCENE */
+
+function createScene() {
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 1000);
+  camera.position.set(0, 0.4, 3.5);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
 
-  const controls=new OrbitControls(camera,renderer.domElement);
-  controls.enableDamping=true;
-  controls.dampingFactor=0.055;
-  controls.minDistance=1.35;
-  controls.maxDistance=14;
-  controls.autoRotate=false;
-  controls.autoRotateSpeed=0.35;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  scene.add(new THREE.AmbientLight(0x8299c0,1.8));
-  const sun=new THREE.DirectionalLight(0xffffff,2.7);
-  sun.position.set(5,3,5);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.055;
+  controls.minDistance = 1.35;
+  controls.maxDistance = 14;
+  controls.autoRotate = false;
+  controls.autoRotateSpeed = 0.35;
+
+  scene.add(new THREE.AmbientLight(0x8299c0, 1.8));
+
+  const sun = new THREE.DirectionalLight(0xffffff, 2.7);
+  sun.position.set(5, 3, 5);
   scene.add(sun);
 
-  const loader=new THREE.TextureLoader();
-  const earthTexture=loader.load(
+  const loader = new THREE.TextureLoader();
+
+  const earthTexture = loader.load(
     "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
-    texture=>{texture.colorSpace=THREE.SRGBColorSpace;},
+    texture => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+    },
     undefined,
-    ()=>console.warn("Earth texture unavailable")
+    () => console.warn("Earth texture unavailable")
   );
 
-  const earth=new THREE.Mesh(
-    new THREE.SphereGeometry(1,96,96),
+  const earth = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 96, 96),
     new THREE.MeshStandardMaterial({
-      map:earthTexture,roughness:1,metalness:0
+      map: earthTexture,
+      roughness: 1,
+      metalness: 0
     })
   );
+
   scene.add(earth);
 
-  const atmosphere=new THREE.Mesh(
-    new THREE.SphereGeometry(1.025,64,64),
+  const atmosphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1.025, 64, 64),
     new THREE.MeshBasicMaterial({
-      color:0x329cff,transparent:true,opacity:0.10,
-      side:THREE.BackSide
+      color: 0x329cff,
+      transparent: true,
+      opacity: 0.10,
+      side: THREE.BackSide
     })
   );
+
   scene.add(atmosphere);
 
-  const stars=[];
-  for(let i=0;i<1800;i++){
-    const r=35;
-    const theta=Math.random()*Math.PI*2;
-    const phi=Math.acos(2*Math.random()-1);
-    stars.push(
-      r*Math.sin(phi)*Math.cos(theta),
-      r*Math.cos(phi),
-      r*Math.sin(phi)*Math.sin(theta)
+  const starPositions = [];
+
+  for (let i = 0; i < 1800; i++) {
+    const r = 35;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+
+    starPositions.push(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.cos(phi),
+      r * Math.sin(phi) * Math.sin(theta)
     );
   }
 
-  const starGeometry=new THREE.BufferGeometry();
+  const starGeometry = new THREE.BufferGeometry();
+
   starGeometry.setAttribute(
-    "position",new THREE.Float32BufferAttribute(stars,3)
+    "position",
+    new THREE.Float32BufferAttribute(starPositions, 3)
   );
+
   scene.add(new THREE.Points(
     starGeometry,
-    new THREE.PointsMaterial({color:0xa8c7ed,size:0.045})
+    new THREE.PointsMaterial({
+      color: 0xa8c7ed,
+      size: 0.045
+    })
   ));
 
-  const satGroup=new THREE.Group();
+  const satGroup = new THREE.Group();
   scene.add(satGroup);
 
-  function resize(){
-    const w=Math.max(1,canvas.clientWidth);
-    const h=Math.max(1,canvas.clientHeight);
-    renderer.setSize(w,h,false);
-    camera.aspect=w/h;
+  function resize() {
+    const w = Math.max(1, canvas.clientWidth);
+    const h = Math.max(1, canvas.clientHeight);
+
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
-  window.addEventListener("resize",resize);
+
+  window.addEventListener("resize", resize);
   resize();
 
-  function animate(){
+  function animate() {
     requestAnimationFrame(animate);
-    controls.autoRotate=autoSpin;
+
+    controls.autoRotate = autoSpin;
     controls.update();
-    renderer.render(scene,camera);
+
+    renderer.render(scene, camera);
   }
+
   animate();
 
-  return {scene,camera,renderer,controls,satGroup};
+  return {
+    scene,
+    camera,
+    renderer,
+    controls,
+    satGroup
+  };
 }
 
-const world=createScene();
+const world = createScene();
 
-function makeCityMarkers(){
-  const group=new THREE.Group();
+/* CITY MARKERS */
+
+function makeCityMarkers() {
+  const group = new THREE.Group();
   world.scene.add(group);
 
-  for(const city of cities){
-    const marker=new THREE.Mesh(
-      new THREE.SphereGeometry(0.012,12,12),
+  for (const city of cities) {
+    const marker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.012, 12, 12),
       new THREE.MeshBasicMaterial({color:0x51d9f4})
     );
-    marker.position.copy(latLonVector(city.lat,city.lon,1.012));
+
+    marker.position.copy(
+      latLonVector(city.lat, city.lon, 1.012)
+    );
+
     group.add(marker);
 
-    const c=document.createElement("canvas");
-    c.width=512;c.height=96;
-    const ctx=c.getContext("2d");
-    ctx.font="bold 38px Arial";
-    ctx.fillStyle="#b9f2ff";
-    ctx.shadowColor="#000";
-    ctx.shadowBlur=8;
-    ctx.fillText(city.name,12,58);
+    const labelCanvas = document.createElement("canvas");
+    labelCanvas.width = 512;
+    labelCanvas.height = 96;
 
-    const texture=new THREE.CanvasTexture(c);
-    const label=new THREE.Sprite(
+    const ctx = labelCanvas.getContext("2d");
+
+    ctx.font = "bold 38px Arial";
+    ctx.fillStyle = "#b9f2ff";
+    ctx.shadowColor = "#000";
+    ctx.shadowBlur = 8;
+    ctx.fillText(city.name, 12, 58);
+
+    const texture = new THREE.CanvasTexture(labelCanvas);
+
+    const label = new THREE.Sprite(
       new THREE.SpriteMaterial({
-        map:texture,transparent:true,depthTest:true
+        map: texture,
+        transparent: true,
+        depthTest: true
       })
     );
-    label.position.copy(latLonVector(city.lat,city.lon,1.045));
-    label.scale.set(0.24,0.045,1);
+
+    label.position.copy(
+      latLonVector(city.lat, city.lon, 1.045)
+    );
+
+    label.scale.set(0.24, 0.045, 1);
     group.add(label);
   }
 }
+
 makeCityMarkers();
 
-function parseTLE(text){
-  const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  const parsed=[];
+/* TLE PARSING */
 
-  for(let i=0;i<lines.length;i++){
-    if(lines[i].startsWith("1 ")&&lines[i+1]?.startsWith("2 ")){
-      const l1=lines[i],l2=lines[i+1];
-      const name=i>0&&!lines[i-1].startsWith("1 ")&&
-        !lines[i-1].startsWith("2 ")
-        ?lines[i-1]:"NORAD "+l1.slice(2,7).trim();
+function parseTLE(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
 
-      try{
-        const satrec=satellite.twoline2satrec(l1,l2);
-        if(satrec.error===0){
-          parsed.push({name,l1,l2,satrec,category:categoryFor(name)});
+  const parsed = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    if (
+      lines[i].startsWith("1 ") &&
+      lines[i + 1]?.startsWith("2 ")
+    ) {
+      const l1 = lines[i];
+      const l2 = lines[i + 1];
+
+      const name =
+        i > 0 &&
+        !lines[i - 1].startsWith("1 ") &&
+        !lines[i - 1].startsWith("2 ")
+          ? lines[i - 1]
+          : "NORAD " + l1.slice(2, 7).trim();
+
+      try {
+        const satrec = satellite.twoline2satrec(l1, l2);
+
+        if (satrec.error === 0) {
+          parsed.push({
+            name,
+            l1,
+            l2,
+            satrec,
+            category: categoryFor(name)
+          });
         }
-      }catch(error){
-        console.warn("Invalid TLE",name,error);
+      } catch (error) {
+        console.warn("Invalid TLE:", name, error);
       }
+
       i++;
     }
   }
+
   return parsed;
 }
 
-async function fetchGroup(group){
-  const url=`https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=tle`;
-  const response=await fetch(url,{cache:"no-store"});
-  if(!response.ok)throw new Error(`${group}: HTTP ${response.status}`);
+async function fetchGroup(group) {
+  const url =
+    `https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=tle`;
+
+  const response = await fetch(url, {cache:"no-store"});
+
+  if (!response.ok) {
+    throw new Error(`${group}: HTTP ${response.status}`);
+  }
+
   return parseTLE(await response.text());
 }
 
-function addObjects(records,source){
-  const existing=new Set(objects.map(o=>o.l1.slice(2,7)));
-  let added=0;
+/* BATCHED SATELLITE RENDERING */
 
-  for(const record of records){
-    const id=record.l1.slice(2,7);
-    if(existing.has(id))continue;
-    existing.add(id);
-    record.source=source;
-    record.category=categoryFor(record.name,source);
+function rebuildSatelliteLayers() {
+  for (const layer of Object.values(satelliteLayers)) {
+    world.satGroup.remove(layer);
+    layer.geometry.dispose();
+    layer.material.dispose();
+  }
 
-    record.mesh=new THREE.Mesh(
-      new THREE.SphereGeometry(0.009,8,8),
-      new THREE.MeshBasicMaterial({
-        color:colors[record.category]||colors.other
-      })
+  satelliteLayers = {};
+
+  const categories = {};
+
+  for (const record of objects) {
+    if (!categories[record.category]) {
+      categories[record.category] = [];
+    }
+
+    categories[record.category].push(record);
+  }
+
+  for (const [category, records] of Object.entries(categories)) {
+    const positions = new Float32Array(records.length * 3);
+
+    const geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(positions, 3)
     );
-    record.mesh.userData.record=record;
-    world.satGroup.add(record.mesh);
+
+    const material = new THREE.PointsMaterial({
+      color: colors[category] || colors.other,
+      size: 5.5,
+      sizeAttenuation: false,
+      transparent: true,
+      opacity: 0.95,
+      depthWrite: false
+    });
+
+    const points = new THREE.Points(geometry, material);
+
+    points.frustumCulled = false;
+
+    world.satGroup.add(points);
+
+    satelliteLayers[category] = {
+      points,
+      geometry,
+      records
+    };
+
+    records.forEach((record, index) => {
+      record.layer = satelliteLayers[category];
+      record.pointIndex = index;
+    });
+  }
+
+  updatePositions();
+}
+
+function addObjects(records, source) {
+  const existing = new Set(
+    objects.map(o => o.l1.slice(2, 7))
+  );
+
+  let added = 0;
+
+  for (const record of records) {
+    const id = record.l1.slice(2, 7);
+
+    if (existing.has(id)) continue;
+
+    existing.add(id);
+
+    record.source = source;
+    record.category = categoryFor(record.name, source);
+
     objects.push(record);
     added++;
   }
+
+  if (added) {
+    rebuildSatelliteLayers();
+  }
+
   return added;
 }
 
-function positionOf(record,date=new Date()){
-  try{
-    const pv=satellite.propagate(record.satrec,date);
-    if(!pv||!pv.position||typeof pv.position==="boolean")return null;
-    const gmst=satellite.gstime(date);
-    const geo=satellite.eciToGeodetic(pv.position,gmst);
-    const lat=satellite.degreesLat(geo.latitude);
-    const lon=satellite.degreesLong(geo.longitude);
-    const altitude=geo.height;
-    const velocity=Math.sqrt(
-      pv.velocity.x**2+pv.velocity.y**2+pv.velocity.z**2
+/* ORBIT PROPAGATION */
+
+function positionOf(record, date = new Date()) {
+  try {
+    const pv = satellite.propagate(record.satrec, date);
+
+    if (
+      !pv ||
+      !pv.position ||
+      typeof pv.position === "boolean"
+    ) return null;
+
+    const gmst = satellite.gstime(date);
+
+    const geo = satellite.eciToGeodetic(
+      pv.position,
+      gmst
     );
-    if(!Number.isFinite(lat)||!Number.isFinite(lon)||
-       !Number.isFinite(altitude)||!Number.isFinite(velocity))return null;
-    return {lat,lon,altitude,velocity};
-  }catch(error){return null;}
+
+    const lat = satellite.degreesLat(geo.latitude);
+    const lon = satellite.degreesLong(geo.longitude);
+    const altitude = geo.height;
+
+    const velocity = Math.sqrt(
+      pv.velocity.x ** 2 +
+      pv.velocity.y ** 2 +
+      pv.velocity.z ** 2
+    );
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      !Number.isFinite(altitude) ||
+      !Number.isFinite(velocity)
+    ) return null;
+
+    return {
+      lat,
+      lon,
+      altitude,
+      velocity
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
-function updatePositions(){
-  const now=new Date();
-  let valid=0;
+function updatePositions() {
+  const now = new Date();
+  let valid = 0;
 
-  for(const record of objects){
-    const p=positionOf(record,now);
-    if(!p){
-      record.mesh.visible=false;
+  for (const record of objects) {
+    const p = positionOf(record, now);
+
+    if (!p) {
+      record.position = null;
+
+      if (record.layer) {
+        record.layer.geometry.attributes.position.setXYZ(
+          record.pointIndex,
+          0, 0, 0
+        );
+      }
+
       continue;
     }
+
     valid++;
-    record.position=p;
-    const radius=1+Math.max(0,p.altitude)/6371;
-    record.mesh.position.copy(latLonVector(p.lat,p.lon,radius));
-    record.mesh.visible=true;
+    record.position = p;
+
+    const radius = 1 + Math.max(0, p.altitude) / 6371;
+
+    const vector = satelliteLatLonVector(
+      p.lat,
+      p.lon,
+      radius
+    );
+
+    if (record.layer) {
+      record.layer.geometry.attributes.position.setXYZ(
+        record.pointIndex,
+        vector.x,
+        vector.y,
+        vector.z
+      );
+    }
   }
 
-  validPositionCount=valid;
-  $("visibleCount").textContent=valid.toLocaleString();
+  for (const layer of Object.values(satelliteLayers)) {
+    layer.geometry.attributes.position.needsUpdate = true;
+  }
 
-  if(selected&&selected.position){
-    $("topAltitude").textContent=
-      Math.round(selected.position.altitude).toLocaleString()+" km";
-    if($("detail").dataset.id===selected.l1.slice(2,7).trim()){
+  validPositionCount = valid;
+
+  $("visibleCount").textContent = valid.toLocaleString();
+
+  if (selected && selected.position) {
+    $("topAltitude").textContent =
+      Math.round(selected.position.altitude).toLocaleString() + " km";
+
+    if (
+      $("detail").dataset.id ===
+      selected.l1.slice(2, 7).trim()
+    ) {
       updateDetail(selected);
     }
   }
+
+  updateSelectedMarker();
 }
 
-function updateCounts(){
-  $("totalCount").textContent=objects.length.toLocaleString();
-  $("visibleCount").textContent=validPositionCount.toLocaleString();
-}
-
-function renderList(){
-  const query=$("search").value.trim().toLowerCase();
-  const filtered=objects.filter(o=>{
-    const matches=o.name.toLowerCase().includes(query)||
-      o.l1.slice(2,7).includes(query);
-    return matches&&(activeFilter==="all"||o.category===activeFilter);
-  }).slice(0,250);
-
-  if(!filtered.length){
-    $("satList").innerHTML='<div class="loading">NO MATCHING OBJECTS</div>';
+function updateSelectedMarker() {
+  if (!selected || !selected.position) {
+    if (selectedMarker) selectedMarker.visible = false;
     return;
   }
 
-  $("satList").innerHTML="";
-  for(const o of filtered){
-    const row=document.createElement("div");
-    row.className="sat-row"+(selected===o?" selected":"");
-    const hex=(colors[o.category]||colors.other).toString(16).padStart(6,"0");
-    const altitude=o.position
-      ?Math.round(o.position.altitude).toLocaleString()+" km"
-      :"Calculating";
+  if (!selectedMarker) {
+    selectedMarker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.019, 16, 16),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff
+      })
+    );
 
-    row.innerHTML=`
-      <span class="dot" style="background:#${hex};color:#${hex}"></span>
+    world.scene.add(selectedMarker);
+  }
+
+  const p = selected.position;
+  const radius = 1 + Math.max(0, p.altitude) / 6371;
+
+  selectedMarker.position.copy(
+    satelliteLatLonVector(p.lat, p.lon, radius)
+  );
+
+  selectedMarker.visible = true;
+}
+
+function updateCounts() {
+  $("totalCount").textContent =
+    objects.length.toLocaleString();
+
+  $("visibleCount").textContent =
+    validPositionCount.toLocaleString();
+}
+
+/* OBJECT CATALOG */
+
+function renderList() {
+  const query = $("search").value.trim().toLowerCase();
+
+  const filtered = objects.filter(o => {
+    const matches =
+      o.name.toLowerCase().includes(query) ||
+      o.l1.slice(2, 7).includes(query);
+
+    return matches &&
+      (activeFilter === "all" || o.category === activeFilter);
+  }).slice(0, 250);
+
+  if (!filtered.length) {
+    $("satList").innerHTML =
+      '<div class="loading">NO MATCHING OBJECTS</div>';
+    return;
+  }
+
+  $("satList").innerHTML = "";
+
+  for (const o of filtered) {
+    const row = document.createElement("div");
+
+    row.className =
+      "sat-row" + (selected === o ? " selected" : "");
+
+    const hex = (colors[o.category] || colors.other)
+      .toString(16)
+      .padStart(6, "0");
+
+    const altitude = o.position
+      ? Math.round(o.position.altitude).toLocaleString() + " km"
+      : "Calculating";
+
+    row.innerHTML = `
+      <span class="dot"
+        style="background:#${hex};color:#${hex}"></span>
       <div class="sat-info">
         <div class="sat-name"></div>
-        <div class="sat-meta">NORAD ${o.l1.slice(2,7).trim()} · ${o.category.toUpperCase()}</div>
+        <div class="sat-meta">
+          NORAD ${o.l1.slice(2,7).trim()} · ${o.category.toUpperCase()}
+        </div>
       </div>
-      <div class="sat-alt">${altitude}</div>`;
-    row.querySelector(".sat-name").textContent=o.name;
-    row.addEventListener("click",()=>selectObject(o));
+      <div class="sat-alt">${altitude}</div>
+    `;
+
+    row.querySelector(".sat-name").textContent = o.name;
+
+    row.addEventListener("click", () => selectObject(o));
+
     $("satList").appendChild(row);
   }
 }
 
-function updateDetail(o){
-  const p=o.position;
-  if(!p)return;
-  const id=o.l1.slice(2,7).trim();
-  const inclination=Number(o.l2.slice(8,16)).toFixed(2);
-  const hex=(colors[o.category]||colors.other).toString(16).padStart(6,"0");
+function updateDetail(o) {
+  const p = o.position;
+  if (!p) return;
 
-  $("detail").dataset.id=id;
-  $("detail").innerHTML=`
+  const id = o.l1.slice(2, 7).trim();
+
+  const inclination = Number(
+    o.l2.slice(8, 16)
+  ).toFixed(2);
+
+  const hex = (colors[o.category] || colors.other)
+    .toString(16)
+    .padStart(6, "0");
+
+  $("detail").dataset.id = id;
+
+  $("detail").innerHTML = `
     <div class="detail-head">
       <div>
         <div class="detail-name"></div>
-        <div class="detail-id">NORAD ${id} · ${o.source||"IMPORTED"}</div>
+        <div class="detail-id">
+          NORAD ${id} · ${o.source || "IMPORTED"}
+        </div>
       </div>
       <span class="dot" style="background:#${hex}"></span>
     </div>
-    <div class="detail-grid">
-      <div class="detail-item"><label>ALTITUDE</label><strong>${p.altitude.toFixed(1)} km</strong></div>
-      <div class="detail-item"><label>VELOCITY</label><strong>${p.velocity.toFixed(2)} km/s</strong></div>
-      <div class="detail-item"><label>LATITUDE</label><strong>${p.lat.toFixed(2)}°</strong></div>
-      <div class="detail-item"><label>LONGITUDE</label><strong>${p.lon.toFixed(2)}°</strong></div>
-      <div class="detail-item"><label>INCLINATION</label><strong>${inclination}°</strong></div>
-      <div class="detail-item"><label>ORBIT CLASS</label><strong>${p.altitude<2000?"LEO":p.altitude<30000?"MEO":"HIGH ORBIT"}</strong></div>
-    </div>
-    <button class="action-btn" id="showOrbit" style="width:100%;margin-top:15px">SHOW ORBITAL PATH</button>`;
 
-  $("detail").querySelector(".detail-name").textContent=o.name;
-  $("showOrbit").addEventListener("click",()=>showOrbit(o));
+    <div class="detail-grid">
+      <div class="detail-item">
+        <label>ALTITUDE</label>
+        <strong>${p.altitude.toFixed(1)} km</strong>
+      </div>
+
+      <div class="detail-item">
+        <label>VELOCITY</label>
+        <strong>${p.velocity.toFixed(2)} km/s</strong>
+      </div>
+
+      <div class="detail-item">
+        <label>LATITUDE</label>
+        <strong>${p.lat.toFixed(2)}°</strong>
+      </div>
+
+      <div class="detail-item">
+        <label>LONGITUDE</label>
+        <strong>${p.lon.toFixed(2)}°</strong>
+      </div>
+
+      <div class="detail-item">
+        <label>INCLINATION</label>
+        <strong>${inclination}°</strong>
+      </div>
+
+      <div class="detail-item">
+        <label>ORBIT CLASS</label>
+        <strong>
+          ${p.altitude < 2000 ? "LEO" :
+            p.altitude < 30000 ? "MEO" : "HIGH ORBIT"}
+        </strong>
+      </div>
+    </div>
+
+    <button class="action-btn" id="showOrbit"
+      style="width:100%;margin-top:15px">
+      SHOW ORBITAL PATH
+    </button>
+  `;
+
+  $("detail").querySelector(".detail-name").textContent = o.name;
+
+  $("showOrbit").addEventListener(
+    "click",
+    () => showOrbit(o)
+  );
 }
 
-function selectObject(o){
-  selected=o;
-  if(!o.position)o.position=positionOf(o,new Date());
+function selectObject(o) {
+  selected = o;
+
+  if (!o.position) {
+    o.position = positionOf(o, new Date());
+  }
+
   renderList();
   updateDetail(o);
-  $("topAltitude").textContent=o.position
-    ?Math.round(o.position.altitude).toLocaleString()+" km":"—";
+  updateSelectedMarker();
+
+  $("topAltitude").textContent = o.position
+    ? Math.round(o.position.altitude).toLocaleString() + " km"
+    : "—";
 }
 
-function showOrbit(o){
-  if(orbitLine){
+/* ORBITAL PATH */
+
+function showOrbit(o) {
+  if (orbitLine) {
     world.scene.remove(orbitLine);
     orbitLine.geometry.dispose();
     orbitLine.material.dispose();
-    orbitLine=null;
+    orbitLine = null;
   }
 
-  const points=[];
-  const start=new Date();
-  for(let i=0;i<=90;i++){
-    const time=new Date(start.getTime()+i*60000);
-    const p=positionOf(o,time);
-    if(p){
-      const radius=1+Math.max(0,p.altitude)/6371;
-      points.push(latLonVector(p.lat,p.lon,radius));
+  const points = [];
+  const start = new Date();
+
+  for (let i = 0; i <= 90; i++) {
+    const time = new Date(
+      start.getTime() + i * 60000
+    );
+
+    const p = positionOf(o, time);
+
+    if (p) {
+      const radius = 1 + Math.max(0, p.altitude) / 6371;
+
+      points.push(
+        satelliteLatLonVector(p.lat, p.lon, radius)
+      );
     }
   }
-  if(points.length<2)return;
 
-  const geometry=new THREE.BufferGeometry().setFromPoints(points);
-  orbitLine=new THREE.Line(
+  if (points.length < 2) return;
+
+  const geometry = new THREE.BufferGeometry()
+    .setFromPoints(points);
+
+  orbitLine = new THREE.Line(
     geometry,
     new THREE.LineBasicMaterial({
-      color:colors[o.category]||colors.other,
-      transparent:true,opacity:0.85
+      color: colors[o.category] || colors.other,
+      transparent: true,
+      opacity: 0.9
     })
   );
+
   world.scene.add(orbitLine);
 }
 
-async function loadLiveData(){
-  $("feedStatus").textContent="FETCHING FEEDS";
-  $("liveLabel").textContent="CONNECTING";
+/* LIVE CELESTRAK DATA */
+
+async function loadLiveData() {
+  $("feedStatus").textContent = "FETCHING FEEDS";
+  $("liveLabel").textContent = "CONNECTING";
   $("feedDot").classList.remove("ok");
 
-  const groups=["stations","starlink","gps-ops","weather","geo","science"];
-  let success=0,addedTotal=0;
-  const errors=[];
+  const groups = [
+    "stations",
+    "starlink",
+    "oneweb",
+    "iridium-NEXT",
+    "orbcomm",
+    "globalstar",
+    "gps-ops",
+    "weather",
+    "geo",
+    "science",
+    "amateur"
+  ];
 
-  for(const group of groups){
-    try{
-      const records=await fetchGroup(group);
-      addedTotal+=addObjects(records,group);
-      success++;
-    }catch(error){
-      console.warn("Feed unavailable:",group,error);
-      errors.push(group);
+  let success = 0;
+  let addedTotal = 0;
+
+  const errors = [];
+
+  /*
+    Use a small concurrency limit so the browser
+    does not launch every request simultaneously.
+  */
+
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < groups.length) {
+      const index = nextIndex++;
+      const group = groups[index];
+
+      try {
+        const records = await fetchGroup(group);
+
+        addedTotal += addObjects(records, group);
+        success++;
+      } catch (error) {
+        console.warn("Feed unavailable:", group, error);
+        errors.push(group);
+      }
     }
   }
 
-  const now=new Date();
-  $("lastUpdate").textContent=success
-    ?now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
-    :"Unavailable";
-  $("dataSource").textContent=success
-    ?`${success}/${groups.length} feeds · +${addedTotal} new`
-    :"No live feeds received";
+  await Promise.all([
+    worker(),
+    worker(),
+    worker()
+  ]);
 
-  $("feedStatus").textContent=success
-    ?(errors.length?"PARTIAL DATA":"FEEDS CONNECTED")
-    :"FEED UNAVAILABLE";
-  $("feedDot").classList.toggle("ok",success>0);
-  $("liveLabel").textContent=success
-    ?(errors.length?"PARTIAL DATA":"DATA CONNECTED")
-    :"OFFLINE";
+  const now = new Date();
+
+  $("lastUpdate").textContent = success
+    ? now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      })
+    : "Unavailable";
+
+  $("dataSource").textContent = success
+    ? `${success}/${groups.length} feeds · +${addedTotal} new`
+    : "No live feeds received";
+
+  $("feedStatus").textContent = success
+    ? (errors.length ? "PARTIAL DATA" : "FEEDS CONNECTED")
+    : "FEED UNAVAILABLE";
+
+  $("feedDot").classList.toggle("ok", success > 0);
+
+  $("liveLabel").textContent = success
+    ? (errors.length ? "PARTIAL DATA" : "DATA CONNECTED")
+    : "OFFLINE";
 
   updatePositions();
   updateCounts();
   renderList();
 
-  if(!selected&&objects.length)selectObject(objects[0]);
+  if (!selected && objects.length) {
+    selectObject(objects[0]);
+  }
 
-  if(!success&&!objects.length){
-    $("satList").innerHTML=
+  if (!success && !objects.length) {
+    $("satList").innerHTML =
       '<div class="loading">LIVE DATA UNAVAILABLE.<br>Check your connection and reload the page.</div>';
   }
 }
 
-async function loadSpaceWeather(){
-  const endpoints={
-    plasma:"https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
-    kp:"https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+/* NOAA SPACE WEATHER */
+
+async function loadSpaceWeather() {
+  const endpoints = {
+    plasma:
+      "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json",
+
+    kp:
+      "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
   };
 
-  try{
-    const response=await fetch(endpoints.plasma,{cache:"no-store"});
-    if(!response.ok)throw new Error("Plasma feed unavailable");
-    const rows=await response.json();
-    const latest=rows.slice(1).reverse().find(r=>
-      r[1]&&r[2]&&Number.isFinite(Number(r[1]))&&Number.isFinite(Number(r[2]))
+  try {
+    const response = await fetch(
+      endpoints.plasma,
+      {cache:"no-store"}
     );
-    if(latest){
-      $("solarDensity").textContent=Number(latest[1]).toFixed(1)+" /cm³";
-      $("solarSpeed").textContent=Math.round(Number(latest[2]))+" km/s";
-      $("solarDensityNote").textContent="Latest available NOAA plasma measurement";
-      $("solarSpeedNote").textContent="Latest available NOAA plasma measurement";
+
+    if (!response.ok) {
+      throw new Error("Plasma feed unavailable");
     }
-  }catch(error){
-    console.warn("Solar wind data unavailable",error);
-    $("solarSpeedNote").textContent="NOAA data currently unavailable";
-    $("solarDensityNote").textContent="NOAA data currently unavailable";
+
+    const rows = await response.json();
+
+    const latest = rows.slice(1).reverse().find(r =>
+      r[1] &&
+      r[2] &&
+      Number.isFinite(Number(r[1])) &&
+      Number.isFinite(Number(r[2]))
+    );
+
+    if (latest) {
+      $("solarDensity").textContent =
+        Number(latest[1]).toFixed(1) + " /cm³";
+
+      $("solarSpeed").textContent =
+        Math.round(Number(latest[2])) + " km/s";
+
+      $("solarDensityNote").textContent =
+        "Latest available NOAA plasma measurement";
+
+      $("solarSpeedNote").textContent =
+        "Latest available NOAA plasma measurement";
+    }
+  } catch (error) {
+    console.warn("Solar wind data unavailable", error);
+
+    $("solarSpeedNote").textContent =
+      "NOAA data currently unavailable";
+
+    $("solarDensityNote").textContent =
+      "NOAA data currently unavailable";
   }
 
-  try{
-    const response=await fetch(endpoints.kp,{cache:"no-store"});
-    if(!response.ok)throw new Error("K-index feed unavailable");
-    const rows=await response.json();
-    const latest=rows.slice(1).reverse().find(r=>
-      r[1]&&Number.isFinite(Number(r[1]))
+  try {
+    const response = await fetch(
+      endpoints.kp,
+      {cache:"no-store"}
     );
-    if(latest){
-      const kp=Number(latest[1]);
-      $("kpIndex").textContent=kp.toFixed(1);
-      $("kpNote").textContent="Latest planetary K-index · NOAA";
+
+    if (!response.ok) {
+      throw new Error("K-index feed unavailable");
     }
-  }catch(error){
-    console.warn("K-index data unavailable",error);
-    $("kpNote").textContent="NOAA data currently unavailable";
+
+    const rows = await response.json();
+
+    const latest = rows.slice(1).reverse().find(r =>
+      r[1] &&
+      Number.isFinite(Number(r[1]))
+    );
+
+    if (latest) {
+      const kp = Number(latest[1]);
+
+      $("kpIndex").textContent = kp.toFixed(1);
+      $("kpNote").textContent =
+        "Latest planetary K-index · NOAA";
+    }
+  } catch (error) {
+    console.warn("K-index data unavailable", error);
+
+    $("kpNote").textContent =
+      "NOAA data currently unavailable";
   }
 }
 
-$("search").addEventListener("input",renderList);
+/* SEARCH AND FILTERS */
 
-document.querySelectorAll(".filter").forEach(button=>{
-  button.addEventListener("click",()=>{
-    document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));
+$("search").addEventListener("input", renderList);
+
+document.querySelectorAll(".filter").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach(b =>
+      b.classList.remove("active")
+    );
+
     button.classList.add("active");
-    activeFilter=button.dataset.filter;
+    activeFilter = button.dataset.filter;
+
     renderList();
   });
 });
 
-$("resetView").addEventListener("click",()=>{
+/* GLOBE CONTROLS */
+
+$("resetView").addEventListener("click", () => {
   world.controls.reset();
-  if(orbitLine){
+
+  if (orbitLine) {
     world.scene.remove(orbitLine);
     orbitLine.geometry.dispose();
     orbitLine.material.dispose();
-    orbitLine=null;
+    orbitLine = null;
   }
 });
 
-$("toggleSpin").addEventListener("click",()=>{
-  autoSpin=!autoSpin;
-  $("toggleSpin").textContent=`AUTO ROTATE: ${autoSpin?"ON":"OFF"}`;
+$("toggleSpin").addEventListener("click", () => {
+  autoSpin = !autoSpin;
+
+  $("toggleSpin").textContent =
+    `AUTO ROTATE: ${autoSpin ? "ON" : "OFF"}`;
 });
 
-$("refreshWeather").addEventListener("click",loadSpaceWeather);
+/* WEATHER REFRESH */
 
-$("tleUpload").addEventListener("change",async e=>{
-  const file=e.target.files[0];
-  if(!file)return;
-  const records=parseTLE(await file.text());
-  const added=addObjects(records,"user import");
+$("refreshWeather").addEventListener(
+  "click",
+  loadSpaceWeather
+);
 
-  $("dataSource").textContent=`${added} imported from ${file.name}`;
-  $("lastUpdate").textContent="Imported";
-  updatePositions();
-  updateCounts();
-  renderList();
+/* IMPORT TLE FILES */
 
-  if(added&&!selected)selectObject(objects[0]);
-  if(!added)alert("No valid standard TLE records were found.");
-  e.target.value="";
+$("tleUpload").addEventListener("change", async e => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const records = parseTLE(await file.text());
+
+    const added = addObjects(records, "user import");
+
+    $("dataSource").textContent =
+      `${added} imported from ${file.name}`;
+
+    $("lastUpdate").textContent = "Imported";
+
+    updatePositions();
+    updateCounts();
+    renderList();
+
+    if (added && !selected) {
+      selectObject(objects[0]);
+    }
+
+    if (!added) {
+      alert("No valid standard TLE records were found.");
+    }
+  } catch (error) {
+    console.error("TLE import failed:", error);
+    alert("Could not read that TLE file.");
+  }
+
+  e.target.value = "";
 });
 
-function updateClocks(){
-  const now=new Date();
-  $("headerUtc").textContent="UTC "+now.toISOString().slice(11,19);
-  $("clocks").innerHTML="";
+/* WORLD CLOCKS */
 
-  for(const city of cities){
-    const time=new Intl.DateTimeFormat("en-GB",{
-      timeZone:city.tz,
-      hour:"2-digit",minute:"2-digit",second:"2-digit",
-      hour12:false
+function updateClocks() {
+  const now = new Date();
+
+  $("headerUtc").textContent =
+    "UTC " + now.toISOString().slice(11, 19);
+
+  $("clocks").innerHTML = "";
+
+  for (const city of cities) {
+    const time = new Intl.DateTimeFormat("en-GB", {
+      timeZone: city.tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
     }).format(now);
 
-    const date=new Intl.DateTimeFormat("en-US",{
-      timeZone:city.tz,
-      weekday:"short",month:"short",day:"numeric"
+    const date = new Intl.DateTimeFormat("en-US", {
+      timeZone: city.tz,
+      weekday: "short",
+      month: "short",
+      day: "numeric"
     }).format(now);
 
-    const card=document.createElement("div");
-    card.className="clock";
-    card.innerHTML=`
+    const card = document.createElement("div");
+    card.className = "clock";
+
+    card.innerHTML = `
       <div class="clock-city"></div>
       <div class="clock-country"></div>
       <div class="clock-time">${time}</div>
-      <div class="clock-date">${date}</div>`;
-    card.querySelector(".clock-city").textContent=city.name;
-    card.querySelector(".clock-country").textContent=city.country;
+      <div class="clock-date">${date}</div>
+    `;
+
+    card.querySelector(".clock-city").textContent =
+      city.name;
+
+    card.querySelector(".clock-country").textContent =
+      city.country;
+
     $("clocks").appendChild(card);
   }
 }
 
+/* INITIALIZATION */
+
 updateClocks();
 updatePositions();
 updateCounts();
+
 loadLiveData();
 loadSpaceWeather();
 
-setInterval(updateClocks,1000);
-setInterval(updatePositions,2000);
-setInterval(renderList,10000);
-setInterval(loadLiveData,30*60*1000);
-setInterval(loadSpaceWeather,10*60*1000);
+setInterval(updateClocks, 1000);
+setInterval(updatePositions, 5000);
+setInterval(renderList, 15000);
+
+setInterval(loadLiveData, 30 * 60 * 1000);
+setInterval(loadSpaceWeather, 10 * 60 * 1000);
+
 </script>
-</body>
-</html>
