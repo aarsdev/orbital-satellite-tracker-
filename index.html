@@ -567,7 +567,16 @@ function latLonVector(lat, lon, radius) {
     -radius * Math.cos(latRad) * Math.sin(lonRad)
   );
 }
+function satelliteLatLonVector(lat, lon, radius) {
+  const latRad = lat * Math.PI / 180;
+  const lonRad = lon * Math.PI / 180;
 
+  return new THREE.Vector3(
+    -radius * Math.cos(latRad) * Math.sin(lonRad),
+    radius * Math.sin(latRad),
+    radius * Math.cos(latRad) * Math.cos(lonRad)
+  );
+}
 function createScene(){
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(42,1,0.1,1000);
