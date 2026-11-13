@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -556,26 +557,16 @@ function categoryFor(name,group=""){
   return "other";
 }
 
-function latLonVector(lat, lon, radius) {
-  const latRad = lat * Math.PI / 180;
-  const lonRad = lon * Math.PI / 180;
-
+function latLonVector(lat,lon,radius){
+  const a=lat*Math.PI/180;
+  const b=lon*Math.PI/180;
   return new THREE.Vector3(
-    radius * Math.cos(latRad) * Math.cos(lonRad),
-    radius * Math.sin(latRad),
-    -radius * Math.cos(latRad) * Math.sin(lonRad)
+    -radius*Math.cos(a)*Math.sin(b),
+    radius*Math.sin(a),
+    radius*Math.cos(a)*Math.cos(b)
   );
 }
-function satelliteLatLonVector(lat, lon, radius) {
-  const latRad = lat * Math.PI / 180;
-  const lonRad = lon * Math.PI / 180;
 
-  return new THREE.Vector3(
-    -radius * Math.cos(latRad) * Math.sin(lonRad),
-    radius * Math.sin(latRad),
-    radius * Math.cos(latRad) * Math.cos(lonRad)
-  );
-}
 function createScene(){
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(42,1,0.1,1000);
@@ -732,9 +723,9 @@ function parseTLE(text){
 }
 
 async function fetchGroup(group){
-  const url=https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=tle;
+  const url=`https://celestrak.org/NORAD/elements/gp.php?GROUP=${encodeURIComponent(group)}&FORMAT=tle`;
   const response=await fetch(url,{cache:"no-store"});
-  if(!response.ok)throw new Error(${group}: HTTP ${response.status});
+  if(!response.ok)throw new Error(`${group}: HTTP ${response.status}`);
   return parseTLE(await response.text());
 }
 
@@ -945,7 +936,7 @@ async function loadLiveData(){
     ?now.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
     :"Unavailable";
   $("dataSource").textContent=success
-    ?${success}/${groups.length} feeds · +${addedTotal} new
+    ?`${success}/${groups.length} feeds · +${addedTotal} new`
     :"No live feeds received";
 
   $("feedStatus").textContent=success
@@ -1034,7 +1025,7 @@ $("resetView").addEventListener("click",()=>{
 
 $("toggleSpin").addEventListener("click",()=>{
   autoSpin=!autoSpin;
-  $("toggleSpin").textContent=AUTO ROTATE: ${autoSpin?"ON":"OFF"};
+  $("toggleSpin").textContent=`AUTO ROTATE: ${autoSpin?"ON":"OFF"}`;
 });
 
 $("refreshWeather").addEventListener("click",loadSpaceWeather);
@@ -1045,7 +1036,7 @@ $("tleUpload").addEventListener("change",async e=>{
   const records=parseTLE(await file.text());
   const added=addObjects(records,"user import");
 
-  $("dataSource").textContent=${added} imported from ${file.name};
+  $("dataSource").textContent=`${added} imported from ${file.name}`;
   $("lastUpdate").textContent="Imported";
   updatePositions();
   updateCounts();
