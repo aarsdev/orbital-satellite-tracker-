@@ -6,19 +6,24 @@
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font:13px/1.5 Inter,system-ui,Arial,sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
-header{position:sticky;top:0;z-index:10;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#080e19e6;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+header{position:sticky;top:0;z-index:30;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#080e19e6;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
 .brand{font-weight:800;letter-spacing:3px;color:var(--cyan)}.brand small{display:block;font:9px monospace;color:var(--muted);letter-spacing:2px}
 .mono,.live,.utc{font-family:ui-monospace,monospace;font-size:11px}.live{color:var(--green)}.utc{color:var(--muted);margin-left:14px}
-main{max-width:1500px;margin:auto;padding:24px}
-h1{font-size:clamp(28px,4vw,48px);margin:6px 0;letter-spacing:-2px}.sub{color:var(--muted);max-width:720px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+main{max-width:1500px;margin:auto;padding:20px 24px}
+h1{font-size:clamp(26px,3.6vw,44px);margin:4px 0;letter-spacing:-2px}.sub{color:var(--muted);max-width:720px;margin-bottom:16px}
 .card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px}
-.card{padding:14px 16px}.lbl{font:10px monospace;color:var(--muted);letter-spacing:1px}.val{font:600 24px ui-monospace,monospace;margin-top:6px}.note{font-size:10px;color:var(--muted)}
+.card{padding:14px 16px}.lbl2{font:10px monospace;color:var(--muted);letter-spacing:1px}.val{font:600 24px ui-monospace,monospace;margin-top:6px}.note{font-size:10px;color:var(--muted)}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px}
 .head{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
 .title{font-weight:700;letter-spacing:1px;font-size:12px}
-.globe{position:relative;height:600px;background:radial-gradient(ellipse at 50% 48%,#102d49,#071426 50%,#030812)}
+.globe{position:relative;height:clamp(520px,80vh,820px);background:radial-gradient(ellipse at 50% 48%,#0e2640,#050d1b 55%,#02060d);overflow:hidden}
 #globe{width:100%;height:100%;display:block;cursor:grab}
+.hud{position:absolute;top:12px;left:12px;display:grid;grid-template-columns:repeat(2,auto);gap:8px;z-index:3;pointer-events:none}
+.hud .card{background:#07132299;backdrop-filter:blur(10px);padding:8px 12px;border-color:#2a4663}
+.hud .val{font-size:17px;margin-top:2px}
+#tip{position:absolute;display:none;z-index:6;pointer-events:none;max-width:240px;padding:8px 10px;background:#071321ee;border:1px solid #3a607d;border-radius:7px;font:10px/1.5 ui-monospace,monospace;color:#eaf6ff;box-shadow:0 8px 24px #0008}
+#tip b{display:block;color:#66e7ff;font:600 12px Inter,system-ui,sans-serif}
+.tag{position:absolute;pointer-events:none;font:10px ui-monospace,monospace;color:#fff;text-shadow:0 0 6px #000,0 0 3px #000;white-space:nowrap;display:none;z-index:4}
 .ctrls{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .chip{display:flex;align-items:center;gap:6px;background:#111c2b;border:1px solid var(--line);border-radius:6px;padding:6px 9px;font:10px monospace;color:#b8c9dd}
 .btn{background:#111d2e;border:1px solid #293b53;color:#c7d8ee;padding:7px 11px;border-radius:6px;font-size:10px}.btn:hover{border-color:var(--cyan)}
@@ -28,29 +33,36 @@ h1{font-size:clamp(28px,4vw,48px);margin:6px 0;letter-spacing:-2px}.sub{color:va
 .list{overflow:auto;max-height:320px;padding:4px 8px}
 .row{display:flex;align-items:center;gap:9px;padding:9px 6px;border-bottom:1px solid #1b293a;cursor:pointer;border-radius:6px}.row:hover,.row.sel{background:#162941}
 .dot{width:8px;height:8px;border-radius:50%;flex:none}.nm{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{font:9px monospace;color:var(--muted)}
-.detail{border-top:1px solid var(--line);padding:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.grid2 label{display:block;font:9px monospace;color:var(--muted)}.grid2 b{font:500 12px monospace}
+.detail{border-top:1px solid var(--line);padding:14px;overflow:auto}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.grid2 label{display:block;font:9px monospace;color:var(--muted)}.grid2 b{font:500 12px monospace}
 .sec{margin-top:14px;overflow:hidden}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px}.g4{display:grid;grid-template-columns:repeat(4,1fr)}
 .clock{padding:14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.clock .t{font:18px monospace;color:var(--cyan);margin-top:6px}
 #groundMap{display:block;width:100%;height:auto;background:#081321}
 footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:28px}
 .fav{background:none;border:1px solid var(--line);color:var(--muted);border-radius:5px;padding:3px 8px}.fav.on{color:#ffdf70;border-color:#806b32}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}.globe{height:440px}.stats,.g3{grid-template-columns:1fr 1fr}.g4{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.stats,.g3{grid-template-columns:1fr}.utc{display:none}main{padding:14px}}
+@media(max-width:1000px){
+ .layout{grid-template-columns:1fr}.globe{height:68vh}.g3{grid-template-columns:1fr 1fr}.g4{grid-template-columns:1fr 1fr}
+ main{padding-bottom:90px}
+ .side{position:fixed;left:0;right:0;bottom:0;z-index:20;max-height:72vh;border-radius:16px 16px 0 0;transform:translateY(calc(100% - 54px));transition:transform .3s}
+ .side.open{transform:none}.side .head{cursor:pointer}
+}
+@media(max-width:520px){.g3{grid-template-columns:1fr}.utc{display:none}main{padding:14px 14px 90px}.hud .val{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <header><div class="brand">ORBITAL<small>GLOBAL SPACE INTELLIGENCE</small></div><div><span class="live" id="liveLabel">INITIALIZING</span><span class="utc" id="utc"></span></div></header>
 <main>
 <h1>Explore the world above us.</h1>
 <div class="sub">An independent space dashboard: orbital positions propagated with SGP4, NOAA space-weather snapshots and world clocks.</div>
-<div class="stats">
-<div class="card"><div class="lbl">OBJECTS LOADED</div><div class="val" id="total">—</div></div>
-<div class="card"><div class="lbl">VALID POSITIONS</div><div class="val" id="valid">—</div></div>
-<div class="card"><div class="lbl">SELECTED ALTITUDE</div><div class="val" id="topAlt">—</div></div>
-<div class="card"><div class="lbl">LAST DATA UPDATE</div><div class="val" id="updated" style="font-size:17px">Waiting</div><div class="note" id="source">Connecting</div></div>
-</div>
 <section class="layout" id="earth">
 <div class="panel"><div class="head"><div class="title">EARTH / ORBITAL VIEW</div><div><button class="btn" id="reset">RESET VIEW</button> <button class="btn" id="spin">AUTO ROTATE: OFF</button></div></div>
-<div class="globe"><canvas id="globe"></canvas></div>
+<div class="globe"><canvas id="globe"></canvas><div id="tip"></div><div class="tag" id="tagIss"></div><div class="tag" id="tagSel"></div>
+<div class="hud">
+<div class="card"><div class="lbl2">OBJECTS</div><div class="val" id="total">—</div></div>
+<div class="card"><div class="lbl2">VALID POSITIONS</div><div class="val" id="valid">—</div></div>
+<div class="card"><div class="lbl2">SELECTED ALT</div><div class="val" id="topAlt">—</div></div>
+<div class="card"><div class="lbl2">LAST UPDATE</div><div class="val" id="updated">Waiting</div><div class="note" id="source">Connecting</div></div>
+</div></div>
 <div class="ctrls">
+<label class="chip"><input type="checkbox" id="follow"> FOLLOW SELECTED</label>
 <label class="chip"><input type="checkbox" id="showCities" checked> CITIES</label>
 <label class="chip"><input type="checkbox" id="showTrail" checked> ORBIT TRAIL</label>
 <label class="chip"><input type="checkbox" data-layer="station" checked> STATIONS</label>
@@ -61,7 +73,7 @@ footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:2
 <label class="chip"><input type="checkbox" data-layer="other" checked> OTHER</label>
 </div></div>
 <aside class="panel side" id="satellites">
-<div class="head"><div class="title">OBJECT CATALOG</div><label class="btn">＋ IMPORT TLE<input type="file" id="upload" accept=".txt,.tle,.dat" hidden></label></div>
+<div class="head" id="sheetHead"><div class="title">OBJECT CATALOG</div><label class="btn">＋ IMPORT TLE<input type="file" id="upload" accept=".txt,.tle,.dat" hidden></label></div>
 <div class="search"><input id="search" placeholder="Search name or NORAD ID...">
 <div class="filters"><button class="f on" data-f="all">ALL</button><button class="f" data-f="station">STATIONS</button><button class="f" data-f="starlink">STARLINK</button><button class="f" data-f="gps">GPS</button><button class="f" data-f="weather">WEATHER</button><button class="f" data-f="geo">GEO</button><button class="f" data-f="other">OTHER</button></div></div>
 <div class="list" id="list"><div class="note" style="padding:20px;text-align:center">Loading orbital data…</div></div>
@@ -69,10 +81,10 @@ footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:2
 </aside></section>
 
 <section class="panel sec"><div class="head"><div class="title">ISS MISSION PANEL</div><span class="mono" id="issStatus">SEARCHING CATALOG</span></div>
-<div class="g3"><div class="card"><div class="lbl">ALTITUDE</div><div class="val" id="issAlt">—</div></div><div class="card"><div class="lbl">SPEED</div><div class="val" id="issVel">—</div></div><div class="card"><div class="lbl">SUBPOINT</div><div class="val" id="issLoc" style="font-size:18px">—</div></div></div></section>
+<div class="g3"><div class="card"><div class="lbl2">ALTITUDE</div><div class="val" id="issAlt">—</div></div><div class="card"><div class="lbl2">SPEED</div><div class="val" id="issVel">—</div></div><div class="card"><div class="lbl2">SUBPOINT</div><div class="val" id="issLoc" style="font-size:18px">—</div></div></div></section>
 
 <section class="panel sec" id="weather"><div class="head"><div class="title">SPACE WEATHER (NOAA SNAPSHOTS)</div><button class="btn" id="refreshWx">↻ REFRESH</button></div>
-<div class="g3"><div class="card"><div class="lbl">SOLAR WIND SPEED</div><div class="val" id="wSpeed">—</div></div><div class="card"><div class="lbl">SOLAR WIND DENSITY</div><div class="val" id="wDens">—</div></div><div class="card"><div class="lbl">PLANETARY K-INDEX</div><div class="val" id="wKp">—</div><div class="note" id="wLevel"></div></div></div>
+<div class="g3"><div class="card"><div class="lbl2">SOLAR WIND SPEED</div><div class="val" id="wSpeed">—</div></div><div class="card"><div class="lbl2">SOLAR WIND DENSITY</div><div class="val" id="wDens">—</div></div><div class="card"><div class="lbl2">PLANETARY K-INDEX</div><div class="val" id="wKp">—</div><div class="note" id="wLevel"></div></div></div>
 <div class="note" id="wNote" style="padding:0 16px 14px"></div></section>
 
 <section class="panel sec" id="ground-track"><div class="head"><div class="title">GROUND-TRACK MAP</div><span class="mono" id="gtName">NO OBJECT SELECTED</span></div><canvas id="groundMap" width="1200" height="500"></canvas></section>
@@ -95,7 +107,7 @@ const GROUPS=["stations","starlink","gps-ops","weather","geo","science","active"
 const MAXP=6000;
 const CITIES=[["NEW YORK","America/New_York",40.71,-74.01],["LONDON","Europe/London",51.51,-.13],["PARIS","Europe/Paris",48.86,2.35],["DUBAI","Asia/Dubai",25.2,55.27],["DELHI","Asia/Kolkata",28.61,77.21],["SINGAPORE","Asia/Singapore",1.35,103.82],["TOKYO","Asia/Tokyo",35.68,139.65],["SYDNEY","Australia/Sydney",-33.87,151.21]];
 
-let objs=[],byId=new Map(),sel=null,filter="all",limit=200,hidden=new Set(),spin=false,trail=null,showTrail=true,favs=new Set();
+let objs=[],byId=new Map(),sel=null,issObj=null,filter="all",limit=200,hidden=new Set(),spin=false,trail=null,showTrail=true,favs=new Set(),flyUntil=0,intro=true;
 try{favs=new Set(JSON.parse(localStorage.getItem("orbitalFavorites")||"[]"))}catch{}
 
 const idOf=o=>o.l1.slice(2,7).trim();
@@ -107,57 +119,113 @@ function cat(n,g){n=n.toUpperCase();
  return g==="geo"?"geo":"other"}
 function ll2v(lat,lon,r){const a=lat*Math.PI/180,b=lon*Math.PI/180;return new THREE.Vector3(r*Math.cos(a)*Math.cos(b),r*Math.sin(a),-r*Math.cos(a)*Math.sin(b))}
 const rad=alt=>1.055+.34*Math.sqrt(Math.min(Math.max(0,alt),40000)/40000);
+function sunVec(d=new Date()){ /* where the Sun is overhead right now */
+ const n=(d-Date.UTC(d.getUTCFullYear(),0,0))/864e5,decl=-23.44*Math.cos(2*Math.PI*(n+10)/365);
+ const h=d.getUTCHours()+d.getUTCMinutes()/60+d.getUTCSeconds()/3600;
+ return ll2v(decl,(12-h)*15,1)}
 
 /* ---------- scene ---------- */
 const canvas=$("globe"),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(42,1,.1,1000);
-camera.position.set(0,.4,3.5);
+camera.position.set(0,.5,8);
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 const controls=new OrbitControls(camera,canvas);
 controls.enableDamping=true;controls.minDistance=1.35;controls.maxDistance=14;
-scene.add(new THREE.AmbientLight(0x8299c0,1.8));
-const sun=new THREE.DirectionalLight(0xffffff,2.7);sun.position.set(5,3,5);scene.add(sun);
-const tex=new THREE.TextureLoader().load("https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",t=>t.colorSpace=THREE.SRGBColorSpace);
-const earth=new THREE.Mesh(new THREE.SphereGeometry(1,96,96),new THREE.MeshStandardMaterial({map:tex,roughness:1}));
-scene.add(earth);
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.03,64,64),new THREE.MeshBasicMaterial({color:0x329cff,transparent:true,opacity:.1,side:THREE.BackSide})));
+
+const loader=new THREE.TextureLoader(),IMG="https://unpkg.com/three-globe/example/img/";
+const dayTex=loader.load(IMG+"earth-blue-marble.jpg",t=>t.colorSpace=THREE.SRGBColorSpace);
+const nightTex=loader.load(IMG+"earth-night.jpg",t=>t.colorSpace=THREE.SRGBColorSpace);
+const earthMat=new THREE.ShaderMaterial({
+ uniforms:{day:{value:dayTex},night:{value:nightTex},sun:{value:sunVec()}},
+ vertexShader:`varying vec2 vUv;varying vec3 vN;
+ void main(){vUv=uv;vN=normal;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+ fragmentShader:`uniform sampler2D day,night;uniform vec3 sun;varying vec2 vUv;varying vec3 vN;
+ void main(){
+  float d=dot(normalize(vN),normalize(sun));float k=smoothstep(-.1,.2,d);
+  vec3 a=texture2D(day,vUv).rgb,b=texture2D(night,vUv).rgb;
+  vec3 c=mix(b*1.4+a*.05,a*(.65+.5*max(d,0.)),k);
+  gl_FragColor=vec4(c,1.);
+  #include <colorspace_fragment>
+ }`});
+const earth=new THREE.Mesh(new THREE.SphereGeometry(1,96,96),earthMat);scene.add(earth);
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.14,64,64),new THREE.ShaderMaterial({
+ transparent:true,side:THREE.BackSide,blending:THREE.AdditiveBlending,depthWrite:false,
+ vertexShader:`varying vec3 n;void main(){n=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+ fragmentShader:`varying vec3 n;void main(){float i=pow(max(0.,.62-dot(n,vec3(0.,0.,1.))),3.);gl_FragColor=vec4(.3,.62,1.,1.)*i*.9;}`})));
 {const s=[];for(let i=0;i<1500;i++){const t=Math.random()*6.283,p=Math.acos(2*Math.random()-1);s.push(35*Math.sin(p)*Math.cos(t),35*Math.cos(p),35*Math.sin(p)*Math.sin(t))}
  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(s,3));
  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xa8c7ed,size:.045})))}
 const cityGroup=new THREE.Group();scene.add(cityGroup);
 for(const[n,,lat,lon]of CITIES){
  const m=new THREE.Mesh(new THREE.SphereGeometry(.012,12,12),new THREE.MeshBasicMaterial({color:0x51d9f4}));
- m.position.copy(ll2v(lat,lon,1.012));cityGroup.add(m)}
+ m.userData.city=n;m.position.copy(ll2v(lat,lon,1.012));cityGroup.add(m)}
 
-/* one Points object for every satellite (fast), instead of thousands of meshes */
+/* glowing satellites: one Points object for everything */
+const gc=document.createElement("canvas");gc.width=gc.height=64;
+{const x=gc.getContext("2d"),g=x.createRadialGradient(32,32,0,32,32,32);
+ g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.25,"rgba(255,255,255,.55)");g.addColorStop(1,"rgba(255,255,255,0)");
+ x.fillStyle=g;x.fillRect(0,0,64,64)}
 const pos=new Float32Array(MAXP*3),colr=new Float32Array(MAXP*3);
 const geo=new THREE.BufferGeometry();
 geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
 geo.setAttribute("color",new THREE.BufferAttribute(colr,3));
 geo.setDrawRange(0,0);
-const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:.022,vertexColors:true}));
+const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:.05,map:new THREE.CanvasTexture(gc),vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
 pts.frustumCulled=false;scene.add(pts);
-const marker=new THREE.Mesh(new THREE.RingGeometry(.02,.026,32),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));
+const marker=new THREE.Mesh(new THREE.RingGeometry(.026,.034,32),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));
 marker.visible=false;scene.add(marker);
 
 function resize(){const w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
 addEventListener("resize",resize);resize();
-(function loop(){requestAnimationFrame(loop);controls.autoRotate=spin;controls.update();
- if(marker.visible)marker.lookAt(camera.position);renderer.render(scene,camera)})();
 
-/* picking: ignore points hidden behind the Earth */
-const rc=new THREE.Raycaster();rc.params.Points.threshold=.018;
-let down=null;
-canvas.addEventListener("pointerdown",e=>down={x:e.clientX,y:e.clientY});
+function place(el,o){ /* floating name label next to a satellite, hidden when it is behind Earth */
+ if(!o||!o.p||hidden.has(o.cat)){el.style.display="none";return}
+ const v=ll2v(o.p.lat,o.p.lon,rad(o.p.alt));
+ if(v.dot(camera.position)<1){el.style.display="none";return}
+ const s=v.clone().project(camera);
+ el.style.display="block";el.textContent=o.name;
+ el.style.left=((s.x+1)/2*canvas.clientWidth+12)+"px";el.style.top=((1-s.y)/2*canvas.clientHeight-6)+"px";
+}
+(function loop(){
+ requestAnimationFrame(loop);
+ const now=performance.now();
+ if(intro){const L=camera.position.length();camera.position.setLength(L+(3.5-L)*.04);
+  if(L-3.5<.02){intro=false;controls.saveState()}}
+ else if(sel?.p&&($("follow").checked||now<flyUntil)){ /* fly to / follow the selected satellite */
+  const L=camera.position.length(),goal=Math.min(L,2.6),t=ll2v(sel.p.lat,sel.p.lon,1).normalize();
+  camera.position.lerp(t.multiplyScalar(L),.07).setLength(L+(goal-L)*.05);
+ }
+ controls.autoRotate=spin&&!intro;controls.update();
+ if(marker.visible)marker.lookAt(camera.position);
+ place($("tagSel"),sel);place($("tagIss"),issObj&&issObj!==sel?issObj:null);
+ renderer.render(scene,camera);
+})();
+
+/* ---------- picking + hover tooltip (ignore anything behind Earth) ---------- */
+const rc=new THREE.Raycaster();rc.params.Points.threshold=.022;
+const tip=$("tip");let down=null;
+function ndc(e){const r=canvas.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),camera);return r}
+function satAt(){
+ const eh=rc.intersectObject(earth)[0],lim=eh?eh.distance:Infinity;
+ const h=rc.intersectObject(pts).find(h=>{const o=objs[h.index];return o&&o.p&&!hidden.has(o.cat)&&h.distance<lim});
+ return{h,lim};
+}
+canvas.addEventListener("pointerdown",e=>{down={x:e.clientX,y:e.clientY};flyUntil=0});
 canvas.addEventListener("pointerup",e=>{
  if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>5){down=null;return}
- down=null;
- const r=canvas.getBoundingClientRect();
- rc.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),camera);
- const eh=rc.intersectObject(earth)[0];
- const hit=rc.intersectObject(pts).find(h=>{const o=objs[h.index];return o&&o.p&&!hidden.has(o.cat)&&(!eh||h.distance<eh.distance)});
- if(hit)select(objs[hit.index]);
+ down=null;ndc(e);const{h}=satAt();if(h)select(objs[h.index]);
 });
+canvas.addEventListener("pointermove",e=>{
+ if(e.buttons){tip.style.display="none";return}
+ const r=ndc(e),{h,lim}=satAt();let html=null;
+ if(h){const o=objs[h.index];html=`<b>${esc(o.name)}</b>NORAD ${idOf(o)} · ${o.cat.toUpperCase()}<br>${Math.round(o.p.alt).toLocaleString()} km · ${o.p.vel.toFixed(1)} km/s`}
+ else if(cityGroup.visible){const c=rc.intersectObjects(cityGroup.children)[0];if(c&&c.distance<lim)html=`<b>${c.object.userData.city}</b>City marker`}
+ if(!html){tip.style.display="none";canvas.style.cursor="grab";return}
+ tip.innerHTML=html;tip.style.display="block";canvas.style.cursor="pointer";
+ tip.style.left=Math.max(8,Math.min(e.clientX-r.left+14,r.width-250))+"px";
+ tip.style.top=Math.max(8,Math.min(e.clientY-r.top+14,r.height-70))+"px";
+});
+canvas.addEventListener("pointerleave",()=>tip.style.display="none");
 
 /* ---------- orbit maths ---------- */
 function parseTLE(text){
@@ -184,7 +252,7 @@ function posOf(o,date=new Date()){
 function metrics(o){
  const r=o.satrec,n=r.no_kozai,e=r.ecco;               /* n is rad/min */
  if(!(n>0))return{};
- const semi=Math.cbrt(398600.4418/((n/60)**2));        /* fixed: needs rad/s */
+ const semi=Math.cbrt(398600.4418/((n/60)**2));        /* needs rad/s */
  return{inc:r.inclo*180/Math.PI,ecc:e,period:2*Math.PI/n,perigee:semi*(1-e)-6371,apogee:semi*(1+e)-6371};
 }
 
@@ -193,7 +261,7 @@ function addObjs(recs,source){
  let added=0;
  for(const r of recs){
   const id=idOf(r),old=byId.get(id);
-  if(old){old.satrec=r.satrec;old.l1=r.l1;old.l2=r.l2;continue}   /* refresh elements, don't skip */
+  if(old){old.satrec=r.satrec;old.l1=r.l1;old.l2=r.l2;continue}   /* refresh elements instead of skipping */
   if(objs.length>=MAXP)break;
   r.cat=cat(r.name,source);r.source=source;r.i=objs.length;
   new THREE.Color(COL[r.cat]).toArray(colr,r.i*3);
@@ -224,14 +292,15 @@ async function loadData(){
   let recs=parseTLE(t);if(g==="active")recs=recs.slice(0,3500);
   if(recs.length){ok++;added+=addObjs(recs,g)}
  }
- $("updated").textContent=ok?new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Unavailable";
- $("source").textContent=ok?`${ok}/${GROUPS.length} feeds · +${added} new`:"No data. Add ./data/*.tle files or check your connection";
+ $("updated").textContent=ok?new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"None";
+ $("source").textContent=ok?`${ok}/${GROUPS.length} feeds · +${added} new`:"No data. Add ./data/*.tle files";
  $("liveLabel").textContent=ok?(ok<GROUPS.length?"PARTIAL DATA":"DATA CONNECTED"):"OFFLINE";
  update();renderList();renderFavs();
- if(!sel&&objs.length)select(objs[0]);
+ if(!sel&&objs.length)select(issObj||objs[0],true);
 }
 async function loadWeather(){
  const rd=async p=>{const r=await fetch(p+"?v="+Math.floor(Date.now()/6e5));if(!r.ok)throw 0;return r.json()};
+ $("wNote").textContent="";
  try{const row=(await rd("./data/solar-wind.json")).slice(1).reverse().find(x=>+x[1]&&+x[2]);
   if(row){$("wDens").textContent=(+row[1]).toFixed(1)+" /cm³";$("wSpeed").textContent=Math.round(+row[2])+" km/s"}}catch{$("wNote").textContent="Solar-wind snapshot unavailable. "}
  try{const row=(await rd("./data/planetary-k-index.json")).slice(1).reverse().find(x=>x[1]&&Number.isFinite(+x[1]));
@@ -242,6 +311,7 @@ async function loadWeather(){
 /* ---------- updates ---------- */
 function update(){
  const now=new Date();let ok=0;
+ earthMat.uniforms.sun.value=sunVec(now);
  for(const o of objs){
   o.p=posOf(o,now);
   if(o.p&&!hidden.has(o.cat)){ok++;const v=ll2v(o.p.lat,o.p.lon,rad(o.p.alt));pos[o.i*3]=v.x;pos[o.i*3+1]=v.y;pos[o.i*3+2]=v.z}
@@ -250,8 +320,8 @@ function update(){
  geo.attributes.position.needsUpdate=true;
  $("total").textContent=objs.length.toLocaleString();$("valid").textContent=ok.toLocaleString();
  if(sel?.p){marker.visible=true;marker.position.copy(ll2v(sel.p.lat,sel.p.lon,rad(sel.p.alt)));$("topAlt").textContent=Math.round(sel.p.alt).toLocaleString()+" km";fillDetail(sel)}
- const iss=objs.find(o=>/\bISS\b|ZARYA/i.test(o.name));
- if(iss?.p){$("issAlt").textContent=iss.p.alt.toFixed(1)+" km";$("issVel").textContent=iss.p.vel.toFixed(2)+" km/s";$("issLoc").textContent=iss.p.lat.toFixed(1)+"°, "+iss.p.lon.toFixed(1)+"°";$("issStatus").textContent="PROPAGATION ACTIVE"}
+ if(!issObj)issObj=objs.find(o=>/\bISS\b|ZARYA/i.test(o.name))||null;
+ if(issObj?.p){$("issAlt").textContent=issObj.p.alt.toFixed(1)+" km";$("issVel").textContent=issObj.p.vel.toFixed(2)+" km/s";$("issLoc").textContent=issObj.p.lat.toFixed(1)+"°, "+issObj.p.lon.toFixed(1)+"°";$("issStatus").textContent="PROPAGATION ACTIVE"}
 }
 function renderList(){
  const q=$("search").value.trim().toLowerCase();
@@ -270,20 +340,24 @@ function fillDetail(o){
  <div class="grid2"><div><label>ALTITUDE</label><b>${p.alt.toFixed(1)} km</b></div><div><label>VELOCITY</label><b>${p.vel.toFixed(2)} km/s</b></div><div><label>LATITUDE</label><b>${p.lat.toFixed(2)}°</b></div><div><label>LONGITUDE</label><b>${p.lon.toFixed(2)}°</b></div><div><label>INCLINATION</label><b>${f(m.inc,2,"°")}</b></div><div><label>ECCENTRICITY</label><b>${f(m.ecc,5)}</b></div><div><label>PERIOD</label><b>${f(m.period,1," min")}</b></div><div><label>PERIGEE / APOGEE</label><b>${m.perigee==null?"—":Math.round(m.perigee)+" / "+Math.round(m.apogee)+" km"}</b></div></div>`;
 }
 $("detail").addEventListener("click",e=>{if(e.target.id==="favBtn"&&sel){const id=idOf(sel);favs.has(id)?favs.delete(id):favs.add(id);try{localStorage.setItem("orbitalFavorites",JSON.stringify([...favs]))}catch{}fillDetail(sel);renderFavs()}});
-function select(o){
+function select(o,quiet){
  if(!o)return;sel=o;if(!o.p)o.p=posOf(o);
+ if(!quiet&&!intro)flyUntil=performance.now()+1400;
  renderList();fillDetail(o);
  $("topAlt").textContent=o.p?Math.round(o.p.alt).toLocaleString()+" km":"—";
  if(o.p){marker.visible=true;marker.position.copy(ll2v(o.p.lat,o.p.lon,rad(o.p.alt)))}
  drawTrail(o);drawGround(o);
 }
-function drawTrail(o){
+function drawTrail(o){ /* comet-tail: bright at the satellite, fading along its future path */
  if(trail){scene.remove(trail);trail.geometry.dispose();trail.material.dispose();trail=null}
  if(!showTrail)return;
  const per=metrics(o).period||90,t0=Date.now(),v=[];
  for(let i=0;i<=120;i++){const p=posOf(o,new Date(t0+i*per*500));if(p)v.push(ll2v(p.lat,p.lon,rad(p.alt)))}
  if(v.length<2)return;
- trail=new THREE.Line(new THREE.BufferGeometry().setFromPoints(v),new THREE.LineBasicMaterial({color:COL[o.cat],transparent:true,opacity:.9}));
+ const base=new THREE.Color(COL[o.cat]),c=[];
+ v.forEach((_,i)=>{const k=1-i/v.length;c.push(base.r*k,base.g*k,base.b*k)});
+ const g=new THREE.BufferGeometry().setFromPoints(v);g.setAttribute("color",new THREE.Float32BufferAttribute(c,3));
+ trail=new THREE.Line(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
  scene.add(trail);
 }
 function drawGround(o){
@@ -316,12 +390,14 @@ function clocks(){
 /* ---------- events ---------- */
 $("search").addEventListener("input",()=>{limit=200;renderList()});
 document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{document.querySelectorAll(".f").forEach(x=>x.classList.remove("on"));b.classList.add("on");filter=b.dataset.f;limit=200;renderList()});
-$("reset").onclick=()=>controls.reset();
+$("reset").onclick=()=>{$("follow").checked=false;flyUntil=0;controls.reset()};
 $("spin").onclick=()=>{spin=!spin;$("spin").textContent="AUTO ROTATE: "+(spin?"ON":"OFF")};
 $("showCities").onchange=e=>cityGroup.visible=e.target.checked;
 $("showTrail").onchange=e=>{showTrail=e.target.checked;sel&&drawTrail(sel)};
 document.querySelectorAll("[data-layer]").forEach(b=>b.onchange=()=>{b.checked?hidden.delete(b.dataset.layer):hidden.add(b.dataset.layer);update()});
 $("refreshWx").onclick=loadWeather;
+$("sheetHead").addEventListener("click",e=>{ /* phones: catalog is a bottom sheet */
+ if(innerWidth<=1000&&!e.target.closest("label"))$("satellites").classList.toggle("open")});
 $("upload").onchange=async e=>{
  const f=e.target.files[0];if(!f)return;
  const n=addObjs(parseTLE(await f.text()),"imported");
