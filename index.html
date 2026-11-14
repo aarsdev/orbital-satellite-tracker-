@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,6 +98,8 @@ h1{font-size:clamp(27px,3vw,42px);margin:9px 0 6px;letter-spacing:-1.7px}
 }
 #globe{width:100%;height:100%;display:block}
 .globe-overlay{position:absolute;pointer-events:none;inset:0}
+.satellite-tooltip{display:none;position:absolute;z-index:6;max-width:240px;padding:8px 10px;border:1px solid #3a607d;border-radius:7px;background:#071321ed;color:#eaf6ff;font:10px "DM Mono";line-height:1.5;box-shadow:0 8px 24px #0008;pointer-events:none;backdrop-filter:blur(8px)}
+.satellite-tooltip strong{display:block;color:#66e7ff;font:600 11px Inter,Arial,sans-serif;margin-bottom:3px}
 .hint{
   position:absolute;bottom:17px;left:18px;color:#8ca1bc;
   font:10px "DM Mono";background:#080e19bb;padding:9px 12px;
@@ -367,7 +368,7 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
     environment, discover satellites, monitor solar activity and view
     worldwide time zones.
   </div>
-  <div class="hero-meta">
+    <div class="hero-meta">
     <span class="hero-pill"><b>● SYSTEM ONLINE</b> · PUBLIC ORBITAL DATA</span>
     <span class="hero-pill">SGP4 POSITION PROPAGATION</span>
     <span class="hero-pill">NOAA SPACE WEATHER SNAPSHOTS</span>
@@ -412,6 +413,7 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
     </div>
     <div class="globe-wrap">
       <canvas id="globe"></canvas>
+      <div class="satellite-tooltip" id="satelliteTooltip" role="status"></div>
       <div class="globe-overlay">
         <div class="globe-tag">EARTH <span>/ 3D VIEW</span></div>
         <div class="hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
@@ -737,7 +739,7 @@ function createScene(){
  controls.minDistance=1.35;
  controls.maxDistance=14;
  scene.add(new THREE.AmbientLight(0x8299c0,1.8));
- const sun=new THREE.DirectionalLight(0xffffff,2.7);
+   const sun=new THREE.DirectionalLight(0xffffff,2.7);
  sun.position.set(5,3,5);
  scene.add(sun);
  const loader=new THREE.TextureLoader();
@@ -806,17 +808,31 @@ const world=createScene();
 
 const markerRaycaster=new THREE.Raycaster();
 const markerPointer=new THREE.Vector2();
+const satelliteTooltip=$("satelliteTooltip");
 let markerPointerStart=null;
-canvas.addEventListener("pointerdown",event=>{markerPointerStart={x:event.clientX,y:event.clientY};});
-canvas.addEventListener("pointerup",event=>{
- if(!markerPointerStart||Math.hypot(event.clientX-markerPointerStart.x,event.clientY-markerPointerStart.y)>5){markerPointerStart=null;return;}
- markerPointerStart=null;
+function pickSatellite(event){
  const rect=canvas.getBoundingClientRect();
  markerPointer.x=((event.clientX-rect.left)/rect.width)*2-1;
  markerPointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
  markerRaycaster.setFromCamera(markerPointer,world.camera);
- const hit=markerRaycaster.intersectObjects(world.satGroup.children,false).find(item=>item.object.visible);
- const record=hit?.object?.userData?.record;
+ return markerRaycaster.intersectObjects(world.satGroup.children,false).find(item=>item.object.visible)?.object?.userData?.record||null;
+}
+canvas.addEventListener("pointermove",event=>{
+ const record=pickSatellite(event);
+ if(!record){satelliteTooltip.style.display="none";canvas.style.cursor="grab";return;}
+ satelliteTooltip.innerHTML=`<strong>${escapeHtml(record.name)}</strong>NORAD ${escapeHtml(recordId(record))} · ${escapeHtml(record.category.toUpperCase())}`;
+ const rect=canvas.getBoundingClientRect();
+ satelliteTooltip.style.left=Math.max(8,Math.min(event.clientX-rect.left+14,rect.width-250))+"px";
+ satelliteTooltip.style.top=Math.max(8,Math.min(event.clientY-rect.top+14,rect.height-58))+"px";
+ satelliteTooltip.style.display="block";
+ canvas.style.cursor="pointer";
+});
+canvas.addEventListener("pointerleave",()=>{satelliteTooltip.style.display="none";canvas.style.cursor="grab";});
+canvas.addEventListener("pointerdown",event=>{markerPointerStart={x:event.clientX,y:event.clientY};});
+canvas.addEventListener("pointerup",event=>{
+ if(!markerPointerStart||Math.hypot(event.clientX-markerPointerStart.x,event.clientY-markerPointerStart.y)>5){markerPointerStart=null;return;}
+ markerPointerStart=null;
+ const record=pickSatellite(event);
  if(record)selectObject(record);
 });
 const cinemaButton=$("cinemaMode");
@@ -893,7 +909,9 @@ function parseTLE(text){
 }
 
 async function fetchGroup(group){
- const url=`./data/${encodeURIComponent(group)}.tle?v=${Date.now()}`;
+ const url=group==="active"
+  ?`https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle&v=${Date.now()}`
+  :`./data/${encodeURIComponent(group)}.tle?v=${Date.now()}`;
  const response=await fetch(url,{cache:"no-store",headers:{Accept:"text/plain"}});
  if(!response.ok)throw new Error(`${group}: snapshot unavailable (HTTP ${response.status})`);
  const body=await response.text();
@@ -914,7 +932,7 @@ function addObjects(records,source){
   existing.add(id);
   r.source=source;
   r.category=categoryFor(r.name,source);
-  r.mesh=new THREE.Mesh(new THREE.SphereGeometry(.008,7,7),new THREE.MeshBasicMaterial({color:colors[r.category]||colors.other}));
+  r.mesh=new THREE.Mesh(new THREE.SphereGeometry(.0048,6,6),new THREE.MeshBasicMaterial({color:colors[r.category]||colors.other}));
   r.mesh.userData.record=r;
   world.satGroup.add(r.mesh);
   objects.push(r);
@@ -1091,8 +1109,85 @@ function showOrbit(o){
 function drawGroundTrack(o){
  const c=$("groundMap"),ctx=c.getContext("2d"),w=c.width,h=c.height;
  ctx.clearRect(0,0,w,h);
- ctx.fillStyle="#081321";ctx.fillRect(0,0,w,h);
- ctx.strokeStyle="#20344c";ctx.lineWidth=1;
+  function updateCounts(){
+ $("totalCount").textContent=objects.length.toLocaleString();
+ $("visibleCount").textContent=validPositionCount.toLocaleString();
+}
+
+function renderList(){
+ const q=$("search").value.trim().toLowerCase();
+ const filtered=objects.filter(o=>(o.name.toLowerCase().includes(q)||recordId(o).includes(q))&&(activeFilter==="all"||o.category===activeFilter));
+ const shown=filtered.slice(0,listLimit);
+ if(!shown.length){
+  $("satList").innerHTML='<div class="loading">NO MATCHING OBJECTS</div>';
+  return;
+ }
+ $("satList").innerHTML="";
+ for(const o of shown){
+  const row=document.createElement("div");
+  row.className="sat-row"+(selected===o?" selected":"");
+  const hex=(colors[o.category]||colors.other).toString(16).padStart(6,"0");
+  const alt=o.position?Math.round(o.position.altitude).toLocaleString()+" km":"Calculating";
+  row.innerHTML=`<span class="dot" style="background:#${hex};color:#${hex}"></span><div class="sat-info"><div class="sat-name"></div><div class="sat-meta">NORAD ${recordId(o)} · ${o.category.toUpperCase()}</div></div><div class="sat-alt">${alt}</div>`;
+  row.querySelector(".sat-name").textContent=o.name;
+  row.addEventListener("click",()=>selectObject(o));
+  $("satList").appendChild(row);
+ }
+ if(filtered.length>shown.length){
+  const more=document.createElement("button");
+  more.className="list-more";
+  more.textContent=`LOAD MORE (${shown.length.toLocaleString()} / ${filtered.length.toLocaleString()})`;
+  more.onclick=()=>{listLimit+=250;renderList();};
+  $("satList").appendChild(more);
+ }
+}
+
+function updateDetail(o){
+ if(!o.position)return;
+ const p=o.position,id=recordId(o),m=orbitalMetrics(o),fav=favorites.has(id);
+ $("detail").dataset.id=id;
+ $("detail").innerHTML=`<div class="detail-head"><div><div class="detail-name"></div><div class="detail-id">NORAD ${id} · ${o.source||"IMPORTED"}</div></div><button class="favorite-btn ${fav?"saved":""}" id="favoriteToggle" title="Save favorite">${fav?"★":"☆"}</button></div><div class="detail-grid"><div class="detail-item"><label>ALTITUDE</label><strong>${p.altitude.toFixed(1)} km</strong></div><div class="detail-item"><label>VELOCITY</label><strong>${p.velocity.toFixed(2)} km/s</strong></div><div class="detail-item"><label>LATITUDE</label><strong>${p.lat.toFixed(2)}°</strong></div><div class="detail-item"><label>LONGITUDE</label><strong>${p.lon.toFixed(2)}°</strong></div><div class="detail-item"><label>INCLINATION</label><strong>${m.inc==null?"—":m.inc.toFixed(2)+"°"}</strong></div><div class="detail-item"><label>ECCENTRICITY</label><strong>${m.ecc==null?"—":m.ecc.toFixed(5)}</strong></div><div class="detail-item"><label>ORBIT PERIOD</label><strong>${m.period==null?"—":(m.period).toFixed(1)+" min"}</strong></div><div class="detail-item"><label>PERIGEE / APOGEE</label><strong>${m.perigee==null?"—":Math.round(m.perigee)+" / "+Math.round(m.apogee)+" km"}</strong></div><div class="detail-item"><label>ORBIT CLASS</label><strong>${p.altitude<2000?"LEO":p.altitude<30000?"MEO":"HIGH ORBIT"}</strong></div></div><button class="action-btn" id="showOrbit" style="width:100%;margin-top:15px">SHOW 90-MIN ORBITAL TRAIL</button><button class="action-btn" id="showGroundTrack" style="width:100%;margin-top:7px">PLOT GROUND TRACK</button>`;
+ $("detail").querySelector(".detail-name").textContent=o.name;
+ $("favoriteToggle").onclick=()=>toggleFavorite(o);
+ $("showOrbit").onclick=()=>showOrbit(o);
+ $("showGroundTrack").onclick=()=>drawGroundTrack(o);
+}
+
+function selectObject(o){
+ selected=o;
+ if(!o.position)o.position=positionOf(o,new Date());
+ renderList();
+ updateDetail(o);
+ $("topAltitude").textContent=o.position?Math.round(o.position.altitude).toLocaleString()+" km":"—";
+ drawGroundTrack(o);
+}
+
+function clearOrbit(){
+ if(orbitLine){
+  world.scene.remove(orbitLine);
+  orbitLine.geometry.dispose();
+  orbitLine.material.dispose();
+  orbitLine=null;
+ }
+}
+
+function showOrbit(o){
+ clearOrbit();
+ if(!orbitTrailVisible)return;
+ const pts=[],period=orbitalMetrics(o).period||90,start=Date.now();
+ for(let i=0;i<=120;i++){
+  const p=positionOf(o,new Date(start+i*period*60000/120));
+  if(p)pts.push(latLonVector(p.lat,p.lon,1.055+0.34*Math.sqrt(Math.min(Math.max(0,p.altitude),40000)/40000)));
+ }
+ if(pts.length<2)return;
+ orbitLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:colors[o.category]||colors.other,transparent:true,opacity:.9}));
+ world.scene.add(orbitLine);
+}
+
+function drawGroundTrack(o){
+ const c=$("groundMap"),ctx=c.getContext("2d"),w=c.width,h=c.height;
+ ctx.clearRect(0,0,w,h);
+   ctx.strokeStyle="#20344c";ctx.lineWidth=1;
  for(let lon=-180;lon<=180;lon+=30){
   let x=(lon+180)/360*w;
   ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();
@@ -1189,7 +1284,7 @@ async function loadLiveData(){
  $("liveLabel").textContent="CONNECTING";
  $("feedDot").classList.remove("ok");
 
- const groups=["stations","starlink","gps-ops","weather","geo","science"];
+ const groups=["stations","starlink","gps-ops","weather","geo","science","active"];
  let successfulFeeds=0,added=0;
  const errors=[];
 
@@ -1209,7 +1304,9 @@ async function loadLiveData(){
    continue;
   }
   successfulFeeds++;
-  added+=addObjects(result.records,result.group);
+  // Load a broad active catalog while keeping rendering responsive.
+  const records=result.group==="active"?result.records.slice(0,3500):result.records;
+  added+=addObjects(records,result.group);
  }
 
  const now=new Date();
