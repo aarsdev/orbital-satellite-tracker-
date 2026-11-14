@@ -1,0 +1,48 @@
+
+name: Update ORBITAL Space Data
+
+on:
+  schedule:
+    - cron: "0,30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download satellite and space weather data
+        run: |
+          mkdir -p data
+
+          for group in stations starlink gps-ops weather geo science; do
+            curl -fLsS --retry 3 \
+              "https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=tle" \
+              -o "data/${group}.tle"
+          done
+
+          curl -fLsS --retry 3 \
+            "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json" \
+            -o data/solar-wind.json
+
+          curl -fLsS --retry 3 \
+            "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json" \
+            -o data/planetary-k-index.json
+
+          curl -fLsS --retry 3 \
+            "https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json" \
+            -o data/xray-flares.json
+
+      - name: Save updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "Update satellite and space weather data"
+          git push
