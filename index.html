@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -330,6 +329,40 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
 @media(max-width:700px){nav{top:60px}.globe-wrap{height:470px}#overview{padding:20px 16px}.radar-legend{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.header-right{gap:7px}.palette-trigger{padding:6px 8px}.hero-meta{gap:6px}.hero-pill{font-size:8px}.globe-wrap{height:410px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+/* ORBITAL EARTH INTELLIGENCE EXPANSION */
+.sat-tooltip{display:none;position:absolute;z-index:8;min-width:190px;max-width:260px;padding:10px 12px;border:1px solid #3a7897;border-radius:8px;background:rgba(4,14,26,.94);box-shadow:0 10px 28px #0008;color:#dff6ff;pointer-events:none;font:10px/1.65 "DM Mono";backdrop-filter:blur(10px)}
+.sat-tooltip strong{display:block;color:#72e6ff;font:600 11px Inter,Arial,sans-serif;margin-bottom:3px}
+.env-panel-head{align-items:center}
+.env-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.env-select-label{display:flex;align-items:center;gap:7px;color:var(--muted);font:9px "DM Mono";letter-spacing:.8px}
+.env-select{max-width:210px;padding:7px 9px;color:#dcecff;background:#0b1422;border:1px solid #2c4560;border-radius:6px;font:10px "DM Mono"}
+.env-status{padding:10px 15px 0;color:#83a0ba;font:9px "DM Mono";letter-spacing:.4px}
+.env-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;padding:15px}
+.env-metric-grid-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.env-metric{min-width:0;padding:14px 15px;border:1px solid #20354e;border-radius:9px;background:linear-gradient(145deg,#111f31,#0b1726)}
+.env-metric .extra-value{font-size:22px}
+.env-subhead{margin-top:2px}
+.forecast-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:14px 15px 16px}
+.forecast-day{padding:13px 10px;border:1px solid #20354e;border-radius:8px;background:#0d1a2a;text-align:center;min-width:0}
+.forecast-date{font:9px "DM Mono";color:#9bb0c8}
+.forecast-icon{font-size:22px;margin:9px 0}
+.forecast-temp{font:13px "DM Mono";color:#e2f6ff}
+.forecast-range{font:9px "DM Mono";color:#7f94ad;margin-top:5px}
+.forecast-rain{font:9px "DM Mono";color:#6edcf3;margin-top:8px}
+.env-explainer{margin:0 15px 15px;padding:12px 14px;border-left:2px solid #3b839e;background:#0d1b2b;color:#9bb0c8;font:9px/1.8 "DM Mono"}
+.event-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px}
+.event-column{min-width:0;padding:14px;border:1px solid #20354e;border-radius:9px;background:#0d1a2a}
+.event-list{display:grid;gap:8px;margin-top:12px}
+.event-row{padding:10px 11px;border:1px solid #20344a;border-radius:7px;background:#101f31}
+.event-row strong{display:block;color:#d9efff;font-size:10px;line-height:1.5}
+.event-row small{display:block;margin-top:5px;color:#8ba2ba;font:9px/1.6 "DM Mono"}
+.event-empty{padding:15px;color:var(--muted);font:10px/1.7 "DM Mono"}
+@media(max-width:1000px){.env-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.event-columns{grid-template-columns:1fr}.forecast-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.env-actions{justify-content:flex-start}}
+@media(max-width:480px){.env-metric-grid,.env-metric-grid-three{grid-template-columns:1fr 1fr}.forecast-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.env-panel-head{align-items:flex-start;flex-direction:column}.env-select{max-width:170px}.env-metric .extra-value{font-size:19px}}
+
 </style>
 </head>
 <body>
@@ -350,6 +383,11 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
   <a href="#earth">EARTH TRACKER</a>
   <a href="#satellites">SATELLITES</a>
   <a href="#weather">SPACE WEATHER</a>
+  <a href="#earth-weather">EARTH WEATHER</a>
+  <a href="#climate-watch">CLIMATE</a>
+  <a href="#air-quality">AIR QUALITY</a>
+  <a href="#ocean-watch">OCEANS</a>
+  <a href="#earth-events">EARTH EVENTS</a>
   <a href="#iss-panel">ISS</a>
   <a href="#orbital-radar">ORBITAL RADAR</a>
   <a href="#ground-track">GROUND TRACK</a>
@@ -412,6 +450,7 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
     </div>
     <div class="globe-wrap">
       <canvas id="globe"></canvas>
+      <div id="satTooltip" class="sat-tooltip" role="status" aria-live="polite"></div>
       <div class="globe-overlay">
         <div class="globe-tag">EARTH <span>/ 3D VIEW</span></div>
         <div class="hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
@@ -430,7 +469,7 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
     </div>
     <div class="extra-controls">
       <label class="toggle-chip">EARTH LAYER <select id="earthLayer" style="background:#0b1422;color:#dcecff;border:0;font:9px 'DM Mono'"><option value="blue">BLUE MARBLE</option><option value="night">NIGHT LIGHTS</option><option value="topo">TOPOGRAPHY</option></select></label>
-      <label class="toggle-chip"><input type="checkbox" id="showCities" checked> CITY LABELS</label>
+      <label class="toggle-chip"><input type="checkbox" id="showCities" checked> CITY MARKERS & LABELS</label>
       <label class="toggle-chip"><input type="checkbox" id="showSatellites" checked> SATELLITE MARKERS</label>
       <label class="toggle-chip"><input type="checkbox" id="showOrbitTrail" checked> ORBIT TRAILS</label>
       <label class="toggle-chip"><input type="checkbox" data-layer="station" checked> STATIONS</label>
@@ -560,6 +599,78 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
   </div>
 </section>
 
+<section id="earth-weather" class="extra-panel">
+  <div class="panel-head env-panel-head">
+    <div><div class="panel-title">EARTH WEATHER / GLOBAL CONDITIONS</div><div class="panel-sub">LIVE MODEL CONDITIONS AND FIVE-DAY OUTLOOK · OPEN-METEO</div></div>
+    <div class="env-actions"><label class="env-select-label">LOCATION <select id="earthWeatherLocation" class="env-select"></select></label><button class="small-btn" id="refreshEarthWeather">↻ REFRESH</button></div>
+  </div>
+  <div class="env-status" id="earthWeatherStatus">Connecting to global weather models…</div>
+  <div class="env-metric-grid">
+    <article class="env-metric"><div class="extra-label">AIR TEMPERATURE</div><div class="extra-value" id="earthTemp">—</div><div class="extra-note" id="earthCondition">Waiting for current conditions</div></article>
+    <article class="env-metric"><div class="extra-label">FEELS LIKE</div><div class="extra-value" id="earthFeels">—</div><div class="extra-note">Modelled apparent temperature</div></article>
+    <article class="env-metric"><div class="extra-label">RELATIVE HUMIDITY</div><div class="extra-value" id="earthHumidity">—</div><div class="extra-note">Near-surface relative humidity</div></article>
+    <article class="env-metric"><div class="extra-label">WIND</div><div class="extra-value" id="earthWind">—</div><div class="extra-note" id="earthWindNote">Speed and direction</div></article>
+    <article class="env-metric"><div class="extra-label">PRECIPITATION</div><div class="extra-value" id="earthPrecip">—</div><div class="extra-note">Current model interval</div></article>
+    <article class="env-metric"><div class="extra-label">CLOUD COVER</div><div class="extra-value" id="earthCloud">—</div><div class="extra-note">Total cloud fraction</div></article>
+    <article class="env-metric"><div class="extra-label">SEA-LEVEL PRESSURE</div><div class="extra-value" id="earthPressure">—</div><div class="extra-note">Atmospheric pressure</div></article>
+    <article class="env-metric"><div class="extra-label">UV INDEX</div><div class="extra-value" id="earthUv">—</div><div class="extra-note">Daily modelled maximum</div></article>
+  </div>
+  <div class="panel-head env-subhead"><div><div class="panel-title">FIVE-DAY FORECAST</div><div class="panel-sub">DAILY MODEL GUIDANCE · NOT AN OFFICIAL WARNING SERVICE</div></div></div>
+  <div id="earthForecast" class="forecast-grid"><div class="loading">Forecast will appear when data arrives.</div></div>
+</section>
+
+<section id="climate-watch" class="extra-panel">
+  <div class="panel-head"><div><div class="panel-title">CLIMATE WATCH / LOCAL TEMPERATURE ANOMALY</div><div class="panel-sub">MONTH-TO-DATE REANALYSIS COMPARED WITH A 1991–2020 ERA5-LAND BASELINE</div></div><span class="status-line" id="climateStatus">AWAITING WEATHER LOCATION</span></div>
+  <div class="env-metric-grid env-metric-grid-three">
+    <article class="env-metric"><div class="extra-label">TEMPERATURE ANOMALY</div><div class="extra-value" id="climateAnomaly">—</div><div class="extra-note" id="climateAnomalyNote">Compared with matching calendar days in the 30-year reference period</div></article>
+    <article class="env-metric"><div class="extra-label">CURRENT MONTH-TO-DATE MEAN</div><div class="extra-value" id="climateCurrentMean">—</div><div class="extra-note" id="climatePeriod">Waiting for completed reanalysis days</div></article>
+    <article class="env-metric"><div class="extra-label">1991–2020 REFERENCE MEAN</div><div class="extra-value" id="climateBaseline">—</div><div class="extra-note">Same location, month and day-of-month window</div></article>
+  </div>
+  <div class="env-explainer">This is a location-specific temperature comparison using Open-Meteo ERA5-Land reanalysis. It is not a global temperature anomaly, a climate attribution study, or an official climate assessment. Reanalysis data is updated with a delay, so the comparison uses the most recent available completed days.</div>
+</section>
+
+<section id="air-quality" class="extra-panel">
+  <div class="panel-head"><div><div class="panel-title">ATMOSPHERIC COMPOSITION / AIR QUALITY</div><div class="panel-sub">MODELLED AIR-QUALITY INDICES AND POLLUTANT CONCENTRATIONS · CAMS</div></div><span class="status-line" id="airQualityStatus">AWAITING DATA</span></div>
+  <div class="env-metric-grid env-metric-grid-three">
+    <article class="env-metric"><div class="extra-label">US AIR QUALITY INDEX</div><div class="extra-value" id="airAqi">—</div><div class="extra-note" id="airAqiNote">AQI category will appear here</div></article>
+    <article class="env-metric"><div class="extra-label">PM2.5</div><div class="extra-value" id="airPm25">—</div><div class="extra-note">Fine particulate matter · μg/m³</div></article>
+    <article class="env-metric"><div class="extra-label">PM10</div><div class="extra-value" id="airPm10">—</div><div class="extra-note">Coarse particulate matter · μg/m³</div></article>
+    <article class="env-metric"><div class="extra-label">OZONE</div><div class="extra-value" id="airOzone">—</div><div class="extra-note">O₃ near-surface model · μg/m³</div></article>
+    <article class="env-metric"><div class="extra-label">NITROGEN DIOXIDE</div><div class="extra-value" id="airNo2">—</div><div class="extra-note">NO₂ · μg/m³</div></article>
+    <article class="env-metric"><div class="extra-label">DUST / AEROSOL</div><div class="extra-value" id="airDust">—</div><div class="extra-note">Modelled dust concentration · μg/m³</div></article>
+  </div>
+  <div class="env-explainer">Air-quality values are gridded model estimates for the selected city, not readings from a nearby regulatory monitor. Local stations may report different values.</div>
+</section>
+
+<section id="ocean-watch" class="extra-panel">
+  <div class="panel-head env-panel-head">
+    <div><div class="panel-title">OCEAN OBSERVATORY / MARINE CONDITIONS</div><div class="panel-sub">SEA-SURFACE TEMPERATURE, WAVES AND SEA-LEVEL MODEL OUTPUT</div></div>
+    <div class="env-actions"><label class="env-select-label">OCEAN REGION <select id="oceanRegion" class="env-select"><option value="atlantic">NORTH ATLANTIC</option><option value="pacific">CENTRAL PACIFIC</option><option value="indian">INDIAN OCEAN</option><option value="southern">SOUTHERN OCEAN</option></select></label><button class="small-btn" id="refreshOcean">↻ REFRESH</button></div>
+  </div>
+  <div class="env-status" id="oceanStatus">Waiting for marine model data…</div>
+  <div class="env-metric-grid">
+    <article class="env-metric"><div class="extra-label">SEA-SURFACE TEMPERATURE</div><div class="extra-value" id="oceanSst">—</div><div class="extra-note">Modelled surface water temperature</div></article>
+    <article class="env-metric"><div class="extra-label">SIGNIFICANT WAVE HEIGHT</div><div class="extra-value" id="oceanWave">—</div><div class="extra-note">Metres</div></article>
+    <article class="env-metric"><div class="extra-label">WAVE PERIOD</div><div class="extra-value" id="oceanPeriod">—</div><div class="extra-note">Seconds</div></article>
+    <article class="env-metric"><div class="extra-label">SEA LEVEL</div><div class="extra-value" id="oceanSeaLevel">—</div><div class="extra-note">Model relative to global mean sea level</div></article>
+  </div>
+  <div class="env-explainer" id="oceanCoordinates">Regional point sample. Marine values vary substantially across each ocean basin and should not be interpreted as basin-wide averages.</div>
+</section>
+
+<section id="earth-events" class="extra-panel">
+  <div class="panel-head"><div><div class="panel-title">EARTH EVENTS / NATURAL HAZARD OBSERVATORY</div><div class="panel-sub">NASA EONET OPEN ENVIRONMENTAL EVENTS · USGS EARTHQUAKE FEED</div></div><button class="small-btn" id="refreshEarthEvents">↻ REFRESH EVENTS</button></div>
+  <div class="env-metric-grid env-metric-grid-three">
+    <article class="env-metric"><div class="extra-label">OPEN NASA EONET EVENTS</div><div class="extra-value" id="eonetCount">—</div><div class="extra-note">Active events in NASA's catalog response</div></article>
+    <article class="env-metric"><div class="extra-label">EARTHQUAKES / LAST 24H</div><div class="extra-value" id="quakeCount">—</div><div class="extra-note">Count in the USGS all-earthquakes daily feed</div></article>
+    <article class="env-metric"><div class="extra-label">LARGEST LISTED MAGNITUDE</div><div class="extra-value" id="quakeLargest">—</div><div class="extra-note" id="quakeLargestNote">Latest feed summary</div></article>
+  </div>
+  <div class="event-columns">
+    <div class="event-column"><div class="panel-title">NASA ENVIRONMENTAL EVENTS</div><div class="panel-sub">WILDFIRES · STORMS · VOLCANIC ACTIVITY · OTHER CATALOGUED EVENTS</div><div id="eonetList" class="event-list"><div class="loading">Loading NASA events…</div></div></div>
+    <div class="event-column"><div class="panel-title">RECENT EARTHQUAKES</div><div class="panel-sub">USGS GEOJSON · ALL MAGNITUDES IN THE DAILY FEED</div><div id="quakeList" class="event-list"><div class="loading">Loading USGS earthquake feed…</div></div></div>
+  </div>
+  <div class="env-explainer">These feeds are situational-awareness and educational references. Event catalogs can be incomplete or delayed, and a listing does not itself indicate local impact. Consult the responsible official agency for local guidance.</div>
+</section>
+
 <section id="ground-track" class="extra-panel">
   <div class="panel-head"><div><div class="panel-title">SATELLITE GROUND-TRACK MAP</div><div class="panel-sub">SELECT A SATELLITE TO PLOT ITS PROPAGATED SUBSATELLITE PATH</div></div><span class="status-line" id="groundTrackName">NO OBJECT SELECTED</span></div>
   <div class="map-wrap"><canvas id="groundMap" width="1200" height="500"></canvas><div class="map-caption">EQUIRECTANGULAR REFERENCE MAP · TRACK IS AN SGP4-BASED ESTIMATE FROM THE CURRENT ELEMENT SET, NOT A LIVE DOWNLINK.</div></div>
@@ -636,6 +747,8 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
 <footer class="footer-note">
   DATA: CELESTRAK PUBLIC GP/TLE CATALOG · POSITION MODEL: SGP4<br>
   SPACE WEATHER: NOAA SPACE WEATHER PREDICTION CENTER<br>
+  EARTH WEATHER / CLIMATE / AIR: <a href="https://open-meteo.com/" target="_blank" rel="noopener">OPEN-METEO</a> · MARINE: <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" rel="noopener">OPEN-METEO MARINE</a><br>
+  NATURAL EVENTS: <a href="https://eonet.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA EONET</a> · EARTHQUAKES: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a><br>
   CITY LOCATIONS: GEOGRAPHIC REFERENCE COORDINATES · CLOCKS: IANA TIME ZONES<br>
   ORBITAL ELEMENTS ARE NOT DIRECT GPS TRACKING. POSITIONS ARE PROPAGATED ESTIMATES.<br>
   DATA AGE AND MODEL ACCURACY AFFECT PRECISION. NOT FOR NAVIGATION OR COLLISION AVOIDANCE.<br><br>
@@ -819,6 +932,31 @@ canvas.addEventListener("pointerup",event=>{
  const record=hit?.object?.userData?.record;
  if(record)selectObject(record);
 });
+
+const satelliteTooltip=$("satTooltip");
+canvas.addEventListener("pointermove",event=>{
+ if(!satelliteTooltip||!objects.length)return;
+ const rect=canvas.getBoundingClientRect();
+ markerPointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+ markerPointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+ markerRaycaster.setFromCamera(markerPointer,world.camera);
+ const hit=markerRaycaster.intersectObjects(world.satGroup.children,false).find(item=>item.object.visible);
+ const record=hit?.object?.userData?.record;
+ if(!record){satelliteTooltip.style.display="none";canvas.style.cursor="grab";return;}
+ const pos=record.position||positionOf(record,new Date());
+ satelliteTooltip.innerHTML="";
+ const title=document.createElement("strong");title.textContent=record.name;
+ const line=document.createElement("div");line.textContent=`NORAD ${recordId(record)} · ${(record.category||"other").toUpperCase()}`;
+ const alt=document.createElement("div");alt.textContent=pos?`ALT ${pos.altitude.toFixed(1)} km · SPEED ${pos.velocity.toFixed(2)} km/s`:"POSITION UNAVAILABLE";
+ satelliteTooltip.append(title,line,alt);
+ const wrap=canvas.parentElement.getBoundingClientRect();
+ const x=Math.min(Math.max(8,event.clientX-wrap.left+14),wrap.width-270);
+ const y=Math.min(Math.max(8,event.clientY-wrap.top+14),wrap.height-88);
+ satelliteTooltip.style.left=x+"px";satelliteTooltip.style.top=y+"px";satelliteTooltip.style.display="block";
+ canvas.style.cursor="pointer";
+});
+canvas.addEventListener("pointerleave",()=>{if(satelliteTooltip)satelliteTooltip.style.display="none";canvas.style.cursor="grab";});
+
 const cinemaButton=$("cinemaMode");
 if(cinemaButton){
  cinemaButton.addEventListener("click",async()=>{
@@ -914,7 +1052,7 @@ function addObjects(records,source){
   existing.add(id);
   r.source=source;
   r.category=categoryFor(r.name,source);
-  r.mesh=new THREE.Mesh(new THREE.SphereGeometry(.008,7,7),new THREE.MeshBasicMaterial({color:colors[r.category]||colors.other}));
+  r.mesh=new THREE.Mesh(new THREE.SphereGeometry(.005,7,7),new THREE.MeshBasicMaterial({color:colors[r.category]||colors.other}));
   r.mesh.userData.record=r;
   world.satGroup.add(r.mesh);
   objects.push(r);
@@ -1401,6 +1539,11 @@ const commandActions=[
  {label:"Earth orbital view",detail:"Jump to the 3D globe",run:()=> $("earth").scrollIntoView({behavior:"smooth"})},
  {label:"Satellite catalog",detail:"Search and select satellites",run:()=>{$("satellites").scrollIntoView({behavior:"smooth"});$("search").focus();}},
  {label:"Space weather",detail:"Open NOAA space-weather panel",run:()=> $("weather").scrollIntoView({behavior:"smooth"})},
+ {label:"Earth weather",detail:"Open global weather and five-day outlook",run:()=> $("earth-weather").scrollIntoView({behavior:"smooth"})},
+ {label:"Climate watch",detail:"Open local 30-year temperature comparison",run:()=> $("climate-watch").scrollIntoView({behavior:"smooth"})},
+ {label:"Air quality",detail:"Open modelled air-quality conditions",run:()=> $("air-quality").scrollIntoView({behavior:"smooth"})},
+ {label:"Ocean observatory",detail:"Open sea-surface and wave conditions",run:()=> $("ocean-watch").scrollIntoView({behavior:"smooth"})},
+ {label:"Earth events",detail:"Open NASA environmental events and earthquakes",run:()=> $("earth-events").scrollIntoView({behavior:"smooth"})},
  {label:"ISS mission panel",detail:"Open station telemetry",run:()=> $("iss-panel").scrollIntoView({behavior:"smooth"})},
  {label:"Orbital radar",detail:"Open altitude distribution radar",run:()=> $("orbital-radar").scrollIntoView({behavior:"smooth"})},
  {label:"Ground track",detail:"Open the selected object's ground track",run:()=> $("ground-track").scrollIntoView({behavior:"smooth"})},
@@ -1443,6 +1586,271 @@ document.addEventListener("keydown",e=>{
  if(e.key==="/"&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();openPalette();}
 });
 
+
+// ----- Expanded Earth intelligence modules -----
+const oceanRegions={
+ atlantic:{name:"NORTH ATLANTIC",lat:40,lon:-45},
+ pacific:{name:"CENTRAL PACIFIC",lat:5,lon:-150},
+ indian:{name:"INDIAN OCEAN",lat:-20,lon:80},
+ southern:{name:"SOUTHERN OCEAN",lat:-55,lon:0}
+};
+const climateCache=new Map();
+let latestQuakes=[],latestEonet=[];
+const envNumber=(v,digits=1)=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v))?Number(v).toFixed(digits):"—";
+const envText=(id,value)=>{const el=$(id);if(el)el.textContent=value;};
+async function getJSON(url,timeoutMs=18000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{
+  const response=await fetch(url,{cache:"no-store",signal:controller.signal,headers:{Accept:"application/json"}});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  return await response.json();
+ }finally{clearTimeout(timer);}
+}
+function datePartsAtZone(timeZone){
+ const parts=new Intl.DateTimeFormat("en-CA",{timeZone,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+ return Object.fromEntries(parts.filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));
+}
+function dateISO(y,m,d){return `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
+function weatherLabel(code){
+ const labels={0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Depositing rime fog",51:"Light drizzle",53:"Drizzle",55:"Dense drizzle",56:"Freezing drizzle",57:"Dense freezing drizzle",61:"Slight rain",63:"Rain",65:"Heavy rain",66:"Freezing rain",67:"Heavy freezing rain",71:"Slight snow",73:"Snow",75:"Heavy snow",77:"Snow grains",80:"Rain showers",81:"Showers",82:"Heavy showers",85:"Snow showers",86:"Heavy snow showers",95:"Thunderstorm",96:"Thunderstorm with hail",99:"Severe thunderstorm with hail"};
+ return labels[code]||"Weather model condition";
+}
+function weatherIcon(code){
+ if(code===0)return "☀";
+ if([1,2].includes(code))return "⛅";
+ if([3,45,48].includes(code))return "☁";
+ if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return "🌧";
+ if([71,73,75,77,85,86].includes(code))return "❄";
+ if([95,96,99].includes(code))return "⚡";
+ return "◌";
+}
+function directionLabel(degrees){
+ if(!Number.isFinite(Number(degrees)))return "";
+ return ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(Number(degrees)/22.5)%16];
+}
+function populateEnvironmentalLocations(){
+ const select=$("earthWeatherLocation");
+ if(!select)return;
+ select.innerHTML="";
+ cities.forEach((city,index)=>{
+  const option=document.createElement("option");option.value=String(index);option.textContent=`${city.name} · ${city.country}`;select.appendChild(option);
+ });
+ select.value="0";
+}
+function selectedWeatherCity(){return cities[Number($("earthWeatherLocation")?.value||0)]||cities[0];}
+function renderForecast(data){
+ const box=$("earthForecast");if(!box)return;box.innerHTML="";
+ const d=data?.daily;if(!d?.time?.length){box.innerHTML='<div class="event-empty">Forecast unavailable for this location.</div>';return;}
+ d.time.slice(0,5).forEach((date,i)=>{
+  const card=document.createElement("article");card.className="forecast-day";
+  const dateEl=document.createElement("div");dateEl.className="forecast-date";dateEl.textContent=new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+  const icon=document.createElement("div");icon.className="forecast-icon";icon.textContent=weatherIcon(d.weather_code?.[i]);
+  const desc=document.createElement("div");desc.className="forecast-date";desc.textContent=weatherLabel(d.weather_code?.[i]);
+  const temp=document.createElement("div");temp.className="forecast-temp";temp.textContent=`${envNumber(d.temperature_2m_max?.[i],0)}° / ${envNumber(d.temperature_2m_min?.[i],0)}°C`;
+  const rain=document.createElement("div");rain.className="forecast-rain";rain.textContent=`RAIN ${envNumber(d.precipitation_probability_max?.[i],0)}%`;
+  card.append(dateEl,icon,desc,temp,rain);box.appendChild(card);
+ });
+}
+async function loadEarthWeather(){
+ const city=selectedWeatherCity();
+ envText("earthWeatherStatus",`FETCHING WEATHER MODEL FOR ${city.name}, ${city.country}…`);
+ try{
+  const params=new URLSearchParams({latitude:city.lat,longitude:city.lon,current:"temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m",daily:"weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,uv_index_max",forecast_days:"5",timezone:"auto",temperature_unit:"celsius",wind_speed_unit:"kmh"});
+  const data=await getJSON(`https://api.open-meteo.com/v1/forecast?${params}`);
+  const c=data.current||{},d=data.daily||{};
+  envText("earthTemp",`${envNumber(c.temperature_2m,1)} °C`);
+  envText("earthCondition",weatherLabel(c.weather_code));
+  envText("earthFeels",`${envNumber(c.apparent_temperature,1)} °C`);
+  envText("earthHumidity",`${envNumber(c.relative_humidity_2m,0)}%`);
+  envText("earthWind",`${envNumber(c.wind_speed_10m,1)} km/h`);
+  envText("earthWindNote",`${directionLabel(c.wind_direction_10m)} · ${envNumber(c.wind_direction_10m,0)}°`);
+  envText("earthPrecip",`${envNumber(c.precipitation,1)} mm`);
+  envText("earthCloud",`${envNumber(c.cloud_cover,0)}%`);
+  envText("earthPressure",`${envNumber(c.pressure_msl,0)} hPa`);
+  envText("earthUv",`${envNumber(d.uv_index_max?.[0],1)}`);
+  renderForecast(data);
+  const stamp=c.time?new Date(c.time).toLocaleString():"time unavailable";
+  envText("earthWeatherStatus",`${city.name}, ${city.country} · model time ${stamp} · refreshed ${new Date().toLocaleTimeString()}`);
+ }catch(error){
+  envText("earthWeatherStatus",`WEATHER DATA UNAVAILABLE FOR ${city.name}: ${error.message}. Check network access and retry.`);
+  envText("earthCondition","No current model response");
+  $("earthForecast").innerHTML='<div class="event-empty">No forecast received. The rest of ORBITAL remains available.</div>';
+  console.warn("Earth weather feed unavailable",error);
+ }
+}
+function meanOf(values){const usable=values.map(Number).filter(Number.isFinite);return usable.length?usable.reduce((a,b)=>a+b,0)/usable.length:null;}
+async function loadClimateBaseline(){
+ const city=selectedWeatherCity(),status=$("climateStatus");
+ if(status)status.textContent=`BUILDING ${city.name} CLIMATE COMPARISON`;
+ envText("climateAnomaly","—");envText("climateCurrentMean","—");envText("climateBaseline","—");
+ const parts=datePartsAtZone(city.tz),year=Number(parts.year),month=Number(parts.month),day=Number(parts.day);
+ // ERA5-Land reanalysis has a several-day publication delay; align the current period to completed days.
+ const availableDay=day-5;
+ if(availableDay<1){
+  envText("climateStatus","WAITING FOR THIS MONTH'S COMPLETED REANALYSIS DAYS");
+  envText("climatePeriod","ERA5-Land data is delayed by several days; try again later in the month.");
+  return;
+ }
+ const key=`${city.lat.toFixed(3)},${city.lon.toFixed(3)}`;
+ try{
+  let baseline=climateCache.get(key);
+  if(!baseline){
+   const p=new URLSearchParams({latitude:city.lat,longitude:city.lon,daily:"temperature_2m_mean",start_date:"1991-01-01",end_date:"2020-12-31",timezone:"auto",models:"era5_land"});
+   const historical=await getJSON(`https://archive-api.open-meteo.com/v1/archive?${p}`,30000);
+   baseline=historical.daily;
+   if(!baseline?.time?.length)throw new Error("30-year reference series was empty");
+   climateCache.set(key,baseline);
+  }
+  const start=dateISO(year,month,1),end=dateISO(year,month,availableDay);
+  const currentParams=new URLSearchParams({latitude:city.lat,longitude:city.lon,daily:"temperature_2m_mean",start_date:start,end_date:end,timezone:"auto",models:"era5_land"});
+  const currentData=await getJSON(`https://archive-api.open-meteo.com/v1/archive?${currentParams}`,25000);
+  const currentMean=meanOf(currentData.daily?.temperature_2m_mean||[]);
+  const yearly=[];
+  for(let y=1991;y<=2020;y++){
+   const values=[];
+   for(let i=0;i<baseline.time.length;i++){
+    const date=baseline.time[i];
+    if(date.startsWith(`${String(y)}-${String(month).padStart(2,"0")}-`)&&Number(date.slice(8,10))<=availableDay){
+     const value=Number(baseline.temperature_2m_mean?.[i]);if(Number.isFinite(value))values.push(value);
+    }
+   }
+   const m=meanOf(values);if(m!==null)yearly.push(m);
+  }
+  const reference=meanOf(yearly);
+  if(currentMean===null||reference===null)throw new Error("Not enough completed daily data for comparison");
+  const anomaly=currentMean-reference;
+  envText("climateAnomaly",`${anomaly>0?"+":""}${anomaly.toFixed(2)} °C`);
+  envText("climateCurrentMean",`${currentMean.toFixed(2)} °C`);
+  envText("climateBaseline",`${reference.toFixed(2)} °C`);
+  envText("climateAnomalyNote",anomaly>=0?"Warmer than the matching 1991–2020 reference window":"Cooler than the matching 1991–2020 reference window");
+  envText("climatePeriod",`${start} through ${end} · ERA5-Land`);
+  envText("climateStatus",`REFERENCE: ${yearly.length} YEARS · UPDATED ${new Date().toLocaleTimeString()}`);
+ }catch(error){
+  envText("climateStatus",`CLIMATE SERIES UNAVAILABLE: ${error.message}`);
+  envText("climatePeriod","Historical reanalysis could not be retrieved. Try again later.");
+  console.warn("Climate baseline unavailable",error);
+ }
+}
+function aqiCategory(value){
+ if(!Number.isFinite(Number(value)))return "AQI NOT REPORTED";
+ const n=Number(value);
+ if(n<=50)return "GOOD";if(n<=100)return "MODERATE";if(n<=150)return "UNHEALTHY FOR SENSITIVE GROUPS";if(n<=200)return "UNHEALTHY";if(n<=300)return "VERY UNHEALTHY";return "HAZARDOUS";
+}
+async function loadAirQuality(){
+ const city=selectedWeatherCity();envText("airQualityStatus",`FETCHING AIR-QUALITY MODEL FOR ${city.name}…`);
+ try{
+  const p=new URLSearchParams({latitude:city.lat,longitude:city.lon,current:"us_aqi,pm2_5,pm10,ozone,nitrogen_dioxide,dust",timezone:"auto"});
+  const data=await getJSON(`https://air-quality-api.open-meteo.com/v1/air-quality?${p}`);
+  const c=data.current||{};
+  envText("airAqi",envNumber(c.us_aqi,0));envText("airAqiNote",aqiCategory(c.us_aqi));
+  envText("airPm25",`${envNumber(c.pm2_5,1)} μg/m³`);envText("airPm10",`${envNumber(c.pm10,1)} μg/m³`);
+  envText("airOzone",`${envNumber(c.ozone,1)} μg/m³`);envText("airNo2",`${envNumber(c.nitrogen_dioxide,1)} μg/m³`);envText("airDust",`${envNumber(c.dust,1)} μg/m³`);
+  envText("airQualityStatus",`${city.name} · MODEL TIME ${c.time||"UNAVAILABLE"} · ${new Date().toLocaleTimeString()}`);
+ }catch(error){
+  envText("airQualityStatus",`AIR-QUALITY FEED UNAVAILABLE: ${error.message}`);
+  envText("airAqiNote","No current model response");
+  console.warn("Air quality feed unavailable",error);
+ }
+}
+async function loadOceanConditions(){
+ const region=oceanRegions[$("oceanRegion")?.value||"atlantic"];
+ envText("oceanStatus",`FETCHING MARINE MODEL FOR ${region.name}…`);
+ envText("oceanCoordinates",`Reference point: ${region.lat.toFixed(1)}°, ${region.lon.toFixed(1)}°. Values are model output for this point, not basin-wide averages.`);
+ try{
+  const p=new URLSearchParams({latitude:region.lat,longitude:region.lon,hourly:"sea_surface_temperature,wave_height,wave_period,sea_level_height_msl",forecast_hours:"1",timezone:"auto"});
+  const data=await getJSON(`https://marine-api.open-meteo.com/v1/marine?${p}`);
+  const h=data.hourly||{};
+  const first=key=>Array.isArray(h[key])?h[key].find(v=>v!==null&&v!==undefined):null;
+  const sst=first("sea_surface_temperature"),wave=first("wave_height"),period=first("wave_period"),level=first("sea_level_height_msl");
+  envText("oceanSst",sst===null?"—":`${envNumber(sst,1)} °C`);
+  envText("oceanWave",wave===null?"—":`${envNumber(wave,2)} m`);
+  envText("oceanPeriod",period===null?"—":`${envNumber(period,1)} s`);
+  envText("oceanSeaLevel",level===null?"—":`${Number(level)>0?"+":""}${envNumber(level,2)} m`);
+  envText("oceanStatus",`${region.name} · MODEL TIME ${h.time?.[0]||"UNAVAILABLE"} · ${new Date().toLocaleTimeString()}`);
+ }catch(error){
+  envText("oceanStatus",`MARINE DATA UNAVAILABLE: ${error.message}. Try another ocean region.`);
+  console.warn("Marine model unavailable",error);
+ }
+}
+function addEventRow(container,title,meta){
+ const row=document.createElement("article");row.className="event-row";
+ const heading=document.createElement("strong");heading.textContent=title||"Untitled event";
+ const detail=document.createElement("small");detail.textContent=meta||"Additional details not supplied";
+ row.append(heading,detail);container.appendChild(row);
+}
+async function loadNaturalEvents(){
+ envText("eonetCount","…");envText("quakeCount","…");
+ const eonetTask=(async()=>{
+  const data=await getJSON("https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=50");
+  latestEonet=data.events||[];
+  envText("eonetCount",latestEonet.length.toLocaleString());
+  const list=$("eonetList");list.innerHTML="";
+  latestEonet.slice(0,8).forEach(event=>{
+   const category=(event.categories||[]).map(x=>x.title).filter(Boolean).join(" · ");
+   const geometry=event.geometry?.[event.geometry.length-1];
+   const date=geometry?.date?new Date(geometry.date).toLocaleDateString():"date not supplied";
+   addEventRow(list,event.title,`${category||"Environmental event"} · ${date}`);
+  });
+  if(!latestEonet.length)list.innerHTML='<div class="event-empty">No open NASA EONET events were returned.</div>';
+ })().catch(error=>{
+  envText("eonetCount","—");$("eonetList").innerHTML='<div class="event-empty">NASA EONET unavailable: '+escapeHtml(error.message)+'</div>';
+  console.warn("NASA EONET unavailable",error);
+ });
+ const quakeTask=(async()=>{
+  const data=await getJSON("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson");
+  latestQuakes=(data.features||[]).slice().sort((a,b)=>(b.properties?.time||0)-(a.properties?.time||0));
+  envText("quakeCount",latestQuakes.length.toLocaleString());
+  const largest=latestQuakes.reduce((best,item)=>{const mag=item.properties?.mag;return mag!==null&&mag!==undefined&&Number.isFinite(Number(mag))&&(!best||Number(mag)>Number(best.properties.mag))?item:best;},null);
+  envText("quakeLargest",largest?.properties?.mag==null?"—":Number(largest.properties.mag).toFixed(1));
+  envText("quakeLargestNote",largest?.properties?.place||"No event reported");
+  const list=$("quakeList");list.innerHTML="";
+  latestQuakes.slice(0,8).forEach(item=>{
+   const p=item.properties||{};const time=p.time?new Date(p.time).toLocaleString():"time unavailable";
+   addEventRow(`M ${p.mag!==null&&p.mag!==undefined&&Number.isFinite(Number(p.mag))?Number(p.mag).toFixed(1):"—"} · ${p.place||"Location not supplied"}`,time+` · depth ${envNumber(item.geometry?.coordinates?.[2],1)} km`);
+  });
+  if(!latestQuakes.length)list.innerHTML='<div class="event-empty">No earthquakes were returned in the daily feed.</div>';
+ })().catch(error=>{
+  envText("quakeCount","—");envText("quakeLargest","—");
+  $("quakeList").innerHTML='<div class="event-empty">USGS feed unavailable: '+escapeHtml(error.message)+'</div>';
+  console.warn("USGS earthquake feed unavailable",error);
+ });
+ await Promise.allSettled([eonetTask,quakeTask]);
+}
+async function loadAllEarthSystems(){
+ await Promise.allSettled([loadEarthWeather(),loadAirQuality(),loadClimateBaseline(),loadOceanConditions(),loadNaturalEvents()]);
+}
+async function loadExpandedSatelliteCatalog(){
+ const status=$("dataSource");
+ try{
+  const response=await fetch("https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle",{cache:"no-store",headers:{Accept:"text/plain"}});
+  if(!response.ok)throw new Error(`CelesTrak HTTP ${response.status}`);
+  const text=await response.text();
+  if(!text.trim()||/^\s*</.test(text))throw new Error("CelesTrak returned an unexpected response");
+  const parsed=parseTLE(text);
+  const selectedCatalog=parsed.slice(0,2500);
+  const added=addObjects(selectedCatalog,"active");
+  envText("dataSource",`${status?.textContent||"Local feeds"} · active catalog +${added} · capped at 2,500`);
+  envText("liveLabel","CATALOG UPDATED");
+  updatePositions();updateCounts();renderList();renderFavorites();drawOrbitalRadar();
+  if(!selected&&objects.length)selectObject(objects[0]);
+ }catch(error){
+  envText("dataSource",`${status?.textContent||"Local feeds"} · expanded catalog unavailable`);
+  console.warn("CelesTrak active catalog unavailable; retaining local snapshots",error);
+ }
+}
+function initEarthIntelligence(){
+ populateEnvironmentalLocations();
+ $("earthWeatherLocation")?.addEventListener("change",()=>{loadEarthWeather();loadAirQuality();loadClimateBaseline();});
+ $("refreshEarthWeather")?.addEventListener("click",()=>{loadEarthWeather();loadAirQuality();loadClimateBaseline();});
+ $("refreshOcean")?.addEventListener("click",loadOceanConditions);
+ $("oceanRegion")?.addEventListener("change",loadOceanConditions);
+ $("refreshEarthEvents")?.addEventListener("click",loadNaturalEvents);
+ loadAllEarthSystems();
+}
+
+initEarthIntelligence();
+loadExpandedSatelliteCatalog();
 updateClocks();
 updatePositions();
 updateCounts();
@@ -1455,6 +1863,10 @@ setInterval(updatePositions,5000);
 setInterval(renderList,15000);
 setInterval(loadLiveData,30*60*1000);
 setInterval(loadSpaceWeather,10*60*1000);
+setInterval(loadEarthWeather,15*60*1000);
+setInterval(loadAirQuality,30*60*1000);
+setInterval(loadOceanConditions,30*60*1000);
+setInterval(loadNaturalEvents,15*60*1000);
 setInterval(()=>{if(objects.length)recalculateProximity();},5*60*1000);
 </script>
 </body>
