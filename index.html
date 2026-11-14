@@ -308,6 +308,12 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
 .radar-stat{border-top:1px solid var(--line);padding-top:11px;margin-top:3px}
 .radar-stat strong{display:block;font:19px "DM Mono";color:var(--cyan);margin-top:5px}
 .radar-note{font:9px/1.7 "DM Mono";color:var(--muted)}
+.weather-alert{display:flex;align-items:center;gap:12px;margin:0 15px 15px;padding:13px 15px;border:1px solid #2a536b;border-radius:8px;background:linear-gradient(90deg,#10283a,#0c1b2b);color:#bfeaff}
+.weather-alert.warning{border-color:#805b39;background:linear-gradient(90deg,#332318,#1a1720);color:#ffd4a5}
+.weather-alert.high{border-color:#82404b;background:linear-gradient(90deg,#351923,#1c1520);color:#ffc1c7}
+.weather-alert-mark{font-size:22px;color:var(--cyan)}
+.weather-alert strong{display:block;font:10px "DM Mono";letter-spacing:.7px}
+.weather-alert small{display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5}
 .command-overlay{position:fixed;inset:0;z-index:100;background:rgba(1,5,12,.78);backdrop-filter:blur(10px);display:none;align-items:flex-start;justify-content:center;padding:14vh 16px 20px}
 .command-overlay.open{display:flex}
 .command-box{width:min(620px,100%);background:#0c1727;border:1px solid #34516e;border-radius:13px;box-shadow:0 25px 100px #000b;overflow:hidden}
@@ -531,6 +537,7 @@ h1{font-size:clamp(32px,4vw,54px);letter-spacing:-2.4px;line-height:1.05}
       <div class="weather-note" id="weatherLevelNote">Based on latest available K-index</div>
     </div>
   </div>
+  <div class="weather-alert" id="weatherAlert" role="status"><span class="weather-alert-mark">◈</span><span><strong id="weatherAlertTitle">SPACE WEATHER STATUS: AWAITING DATA</strong><small id="weatherAlertText">The latest NOAA K-index snapshot will appear here when available.</small></span></div>
   <div class="panel-head">
     <div>
       <div class="panel-title">SPACE WEATHER INFORMATION</div>
@@ -796,6 +803,31 @@ function createScene(){
 }
 
 const world=createScene();
+
+const markerRaycaster=new THREE.Raycaster();
+const markerPointer=new THREE.Vector2();
+let markerPointerStart=null;
+canvas.addEventListener("pointerdown",event=>{markerPointerStart={x:event.clientX,y:event.clientY};});
+canvas.addEventListener("pointerup",event=>{
+ if(!markerPointerStart||Math.hypot(event.clientX-markerPointerStart.x,event.clientY-markerPointerStart.y)>5){markerPointerStart=null;return;}
+ markerPointerStart=null;
+ const rect=canvas.getBoundingClientRect();
+ markerPointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+ markerPointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+ markerRaycaster.setFromCamera(markerPointer,world.camera);
+ const hit=markerRaycaster.intersectObjects(world.satGroup.children,false).find(item=>item.object.visible);
+ const record=hit?.object?.userData?.record;
+ if(record)selectObject(record);
+});
+canvas.addEventListener("pointermove",event=>{
+ if(markerPointerStart)return;
+ const rect=canvas.getBoundingClientRect();
+ markerPointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+ markerPointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+ markerRaycaster.setFromCamera(markerPointer,world.camera);
+ const hit=markerRaycaster.intersectObjects(world.satGroup.children,false).some(item=>item.object.visible);
+ canvas.style.cursor=hit?"pointer":"grab";
+});
 
 const cinemaButton=$("cinemaMode");
 if(cinemaButton){
@@ -1256,9 +1288,18 @@ async function loadSpaceWeather(){
    $("kpNote").textContent="Latest planetary K-index · scheduled NOAA snapshot";
    $("weatherLevel").textContent=kp>=7?"STRONG":kp>=5?"ACTIVE":kp>=4?"UNSETTLED":"QUIET";
    $("weatherLevelNote").textContent="Indicative category from latest K-index";
+   const alertBox=$("weatherAlert"),alertTitle=$("weatherAlertTitle"),alertText=$("weatherAlertText");
+   if(alertBox&&alertTitle&&alertText){
+    alertBox.classList.toggle("warning",kp>=5&&kp<7);
+    alertBox.classList.toggle("high",kp>=7);
+    alertTitle.textContent=kp>=7?"ELEVATED GEOMAGNETIC ACTIVITY":kp>=5?"GEOMAGNETIC ACTIVITY: ACTIVE":"SPACE WEATHER STATUS: QUIET TO UNSETTLED";
+    alertText.textContent=kp>=7?"The latest K-index is "+kp.toFixed(1)+". Conditions are elevated; consult NOAA for current official alerts and impacts.":kp>=5?"The latest K-index is "+kp.toFixed(1)+". Geomagnetic activity is active; this dashboard is informational, not an alert service.":"The latest K-index is "+kp.toFixed(1)+". No elevated K-index category is indicated by this snapshot.";
+   }
   }
  }catch(e){
   $("kpNote").textContent="NOAA K-index snapshot unavailable — run the GitHub data workflow";
+  if($("weatherAlertTitle"))$("weatherAlertTitle").textContent="SPACE WEATHER STATUS: DATA UNAVAILABLE";
+  if($("weatherAlertText"))$("weatherAlertText").textContent="No current K-index snapshot is available. Check NOAA Space Weather Prediction Center for official conditions.";
   console.warn("K-index snapshot unavailable",e);
  }
  try{
