@@ -819,16 +819,6 @@ canvas.addEventListener("pointerup",event=>{
  const record=hit?.object?.userData?.record;
  if(record)selectObject(record);
 });
-canvas.addEventListener("pointermove",event=>{
- if(markerPointerStart)return;
- const rect=canvas.getBoundingClientRect();
- markerPointer.x=((event.clientX-rect.left)/rect.width)*2-1;
- markerPointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
- markerRaycaster.setFromCamera(markerPointer,world.camera);
- const hit=markerRaycaster.intersectObjects(world.satGroup.children,false).some(item=>item.object.visible);
- canvas.style.cursor=hit?"pointer":"grab";
-});
-
 const cinemaButton=$("cinemaMode");
 if(cinemaButton){
  cinemaButton.addEventListener("click",async()=>{
