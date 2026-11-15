@@ -48,7 +48,7 @@ footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:2
 @media(max-width:520px){.g3,.g4{grid-template-columns:1fr}.utc{display:none}main{padding:14px 14px 90px}.hud .val{font-size:14px}}
 </style></head><body>
 <header><div class="brand">ORBITAL<small>GLOBAL SPACE INTELLIGENCE</small></div><div><span class="live" id="liveLabel">INITIALIZING</span><span class="utc" id="utc"></span></div></header>
-<nav><a href="#earth">EARTH TRACKER</a><a href="#iss">ISS</a><a href="#space-wx">SPACE WEATHER</a><a href="#earth-wx">EARTH WEATHER</a><a href="#air">AIR QUALITY</a><a href="#ocean">OCEANS</a><a href="#events">EARTH EVENTS</a><a href="#ground">GROUND TRACK</a><a href="#favs">FAVORITES</a><a href="#clk">CLOCKS</a></nav>
+<nav><a href="#earth">EARTH TRACKER</a><a href="#iss">ISS</a><a href="#space-wx">SPACE WEATHER</a><a href="#earth-wx">EARTH WEATHER</a><a href="#climate">CLIMATE ANOMALY</a><a href="#air">AIR QUALITY</a><a href="#ocean">OCEANS</a><a href="#events">EARTH EVENTS</a><a href="#ground">GROUND TRACK</a><a href="#favs">FAVORITES</a><a href="#clk">CLOCKS</a></nav>
 <main>
 <h1>Explore the world above us.</h1>
 <div class="sub">An independent space intelligence dashboard: satellites propagated with SGP4, space weather, Earth conditions and world clocks.</div>
@@ -78,6 +78,17 @@ footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:2
 
 <section class="panel sec" id="earth-wx"><div class="head"><div class="title">EARTH WEATHER · OPEN-METEO</div><label class="chip">LOCATION <select id="city"></select></label></div><div class="stat" id="wxStatus">Connecting…</div><div class="g4" id="wxBox"></div><div class="g5" id="fcBox"></div></section>
 
+<section class="panel sec" id="climate">
+<div class="head"><div><div class="title">CLIMATE ANOMALY / HISTORICAL BASELINE</div><div class="note">PREVIOUS CALENDAR MONTH VS 1991–2020 · ERA5 REANALYSIS · MATCHED DAYS</div></div><button class="btn" id="refreshClimate">↻ REFRESH CLIMATE</button></div>
+<div class="stat" id="climateStatus">Waiting for historical climate data…</div>
+<div class="g3" id="climateBox">
+ <div class="card"><div class="lbl2">RECENT MONTH MEAN</div><div class="val">—</div><div class="note">Daily mean temperature</div></div>
+ <div class="card"><div class="lbl2">1991–2020 BASELINE</div><div class="val">—</div><div class="note">Same calendar month</div></div>
+ <div class="card"><div class="lbl2">TEMPERATURE ANOMALY</div><div class="val">—</div><div class="note">Difference from baseline</div></div>
+</div>
+<div class="stat" id="climateNote">The anomaly is local to the selected city and compares available days from the previous calendar month with the same days in that calendar month across 1991–2020. It is not a global temperature anomaly or a long-term trend estimate.</div>
+</section>
+
 <section class="panel sec" id="air"><div class="head"><div class="title">AIR QUALITY · MODELLED (CAMS)</div></div><div class="stat" id="airStatus">Waiting…</div><div class="g4" id="airBox"></div><div class="stat">Gridded model estimates for the selected city, not readings from a local monitor.</div></section>
 
 <section class="panel sec" id="ocean"><div class="head"><div class="title">OCEAN OBSERVATORY · MARINE MODEL</div><label class="chip">REGION <select id="region"><option value="atlantic">NORTH ATLANTIC</option><option value="pacific">CENTRAL PACIFIC</option><option value="indian">INDIAN OCEAN</option><option value="southern">SOUTHERN OCEAN</option></select></label></div><div class="stat" id="oceanStatus">Waiting…</div><div class="g4" id="oceanBox"></div></section>
@@ -89,7 +100,7 @@ footer{color:var(--muted);font:10px/1.9 monospace;text-align:center;margin-top:2
 <section class="panel sec" id="ground"><div class="head"><div class="title">GROUND-TRACK MAP</div><span class="mono" id="gtName">NO OBJECT SELECTED</span></div><canvas id="groundMap" width="1200" height="500"></canvas></section>
 <section class="panel sec" id="favs"><div class="head"><div class="title">MY FAVORITES</div><span class="mono">SAVED IN THIS BROWSER</span></div><div class="g3" id="favList"></div></section>
 <section class="panel sec" id="clk"><div class="head"><div class="title">WORLD CLOCKS</div></div><div class="clocks" id="clocks"></div></section>
-<footer>DATA: CELESTRAK · MODEL: SGP4 · SPACE WEATHER: NOAA SWPC<br>EARTH: <a href="https://open-meteo.com/" target="_blank" rel="noopener">OPEN-METEO</a> · EVENTS: <a href="https://eonet.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA EONET</a> · <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a><br>POSITIONS ARE PROPAGATED ESTIMATES. NOT FOR NAVIGATION OR COLLISION AVOIDANCE. NOT AFFILIATED WITH NASA, NOAA OR CELESTRAK.</footer>
+<footer>DATA: CELESTRAK TLE + OMM · MODEL: SGP4 · SPACE WEATHER: NOAA SWPC<br>CLIMATE: ERA5 REANALYSIS · 1991–2020 SAME-MONTH LOCAL BASELINE<br>EARTH: <a href="https://open-meteo.com/" target="_blank" rel="noopener">OPEN-METEO</a> · EVENTS: <a href="https://eonet.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA EONET</a> · <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a><br>POSITIONS ARE PROPAGATED ESTIMATES. NOT FOR NAVIGATION OR COLLISION AVOIDANCE. NOT AFFILIATED WITH NASA, NOAA OR CELESTRAK.</footer>
 </main>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","satellite.js":"https://cdn.jsdelivr.net/npm/satellite.js@6.0.1/+esm"}}</script>
@@ -102,19 +113,23 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const COL={station:0x51d9f4,starlink:0xffdf70,gps:0xa991ff,weather:0x50e3a4,geo:0xffb66d,other:0x83a4c9};
 const hex=c=>"#"+c.toString(16).padStart(6,"0");
-const GROUPS=["stations","starlink","gps-ops","weather","geo","science","active"];
-const MAXP=6000;
+const GROUPS=["stations","starlink","gps-ops","weather","geo","science"];
+const OMM_GROUPS=["active","analyst"];
+const GROUP_CAPS={stations:250,starlink:4500,"gps-ops":500,weather:600,geo:1800,science:1200};
+const OMM_CAPS={active:12000,analyst:3000};
+const MAXP=15000;
+const OMM_MEMORY=new Map();
 const CITIES=[["NEW YORK","America/New_York",40.71,-74.01],["LOS ANGELES","America/Los_Angeles",34.05,-118.24],["LONDON","Europe/London",51.51,-.13],["PARIS","Europe/Paris",48.86,2.35],["CAIRO","Africa/Cairo",30.04,31.24],["DUBAI","Asia/Dubai",25.2,55.27],["DELHI","Asia/Kolkata",28.61,77.21],["SINGAPORE","Asia/Singapore",1.35,103.82],["BEIJING","Asia/Shanghai",39.9,116.41],["TOKYO","Asia/Tokyo",35.68,139.65],["SYDNEY","Australia/Sydney",-33.87,151.21],["SAO PAULO","America/Sao_Paulo",-23.55,-46.63]];
 const REGIONS={atlantic:[40,-45],pacific:[5,-150],indian:[-20,80],southern:[-55,0]};
 
 let objs=[],byId=new Map(),sel=null,issObj=null,filter="all",limit=200,hidden=new Set(),spin=false,trail=null,showTrail=true,favs=new Set(),flyUntil=0,intro=true;
 try{favs=new Set(JSON.parse(localStorage.getItem("orbitalFavorites")||"[]"))}catch{}
 
-const idOf=o=>o.l1.slice(2,7).trim();
-function cat(n,g){n=n.toUpperCase();
+const idOf=o=>String(o.noradId??o.satrec?.satnum??(o.l1?o.l1.slice(2,7).trim():"UNKNOWN"));
+function cat(n,g){n=String(n||"").toUpperCase();
  if(g==="stations"||/\bISS\b|ZARYA|TIANGONG/.test(n))return"station";
  if(g==="starlink"||n.includes("STARLINK"))return"starlink";
- if(g==="gps-ops"||/GPS|NAVSTAR/.test(n))return"gps";
+ if(["gps-ops","glo-ops","galileo","beidou","sbas"].includes(g)||/GPS|NAVSTAR|GLONASS|GALILEO|BEIDOU|COMPASS|NAVIGATION/.test(n))return"gps";
  if(g==="weather"||/NOAA|GOES|METEOR|WEATHER/.test(n))return"weather";
  return g==="geo"?"geo":"other"}
 function ll2v(lat,lon,r){const a=lat*Math.PI/180,b=lon*Math.PI/180;return new THREE.Vector3(r*Math.cos(a)*Math.cos(b),r*Math.sin(a),-r*Math.cos(a)*Math.sin(b))}
@@ -212,18 +227,6 @@ canvas.addEventListener("pointermove",e=>{
 canvas.addEventListener("pointerleave",()=>tip.style.display="none");
 
 /* ---------- orbit maths ---------- */
-function parseTLE(text){
- const L=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),out=[];
- for(let i=0;i<L.length;i++){
-  if(L[i].startsWith("1 ")&&L[i+1]?.startsWith("2 ")){
-   const l1=L[i],l2=L[i+1],prev=L[i-1];
-   const name=i>0&&!/^[12] /.test(prev)?prev:"NORAD "+l1.slice(2,7).trim();
-   try{const satrec=sat.twoline2satrec(l1,l2);if(satrec.error===0)out.push({name,l1,l2,satrec})}catch{}
-   i++;
-  }
- }
- return out;
-}
 function posOf(o,date=new Date()){
  try{
   const pv=sat.propagate(o.satrec,date);
@@ -240,12 +243,38 @@ function metrics(o){
  return{inc:r.inclo*180/Math.PI,ecc:e,period:2*Math.PI/n,perigee:semi*(1-e)-6371,apogee:semi*(1+e)-6371};
 }
 
-/* ---------- satellite data ---------- */
+/* ---------- satellite data: local TLE snapshots + CelesTrak OMM catalogs ---------- */
+function parseTLE(text){
+ const L=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean),out=[];
+ for(let i=0;i<L.length;i++){
+  if(L[i].startsWith("1 ")&&L[i+1]?.startsWith("2 ")){
+   const l1=L[i],l2=L[i+1],prev=L[i-1];
+   const name=i>0&&!/^[12] /.test(prev)?prev:"NORAD "+l1.slice(2,7).trim();
+   try{const satrec=sat.twoline2satrec(l1,l2);if(satrec.error===0)out.push({name,noradId:l1.slice(2,7).trim(),l1,l2,satrec})}catch{}
+   i++;
+  }
+ }
+ return out;
+}
+function parseOMM(rows,source){
+ const list=Array.isArray(rows)?rows:(rows&&rows.NORAD_CAT_ID?[rows]:[]),out=[];
+ for(const row of list){
+  try{
+   const noradId=String(row.NORAD_CAT_ID??"").trim();
+   if(!noradId)continue;
+   const satrec=sat.json2satrec(row);
+   if(!satrec||(Number.isFinite(satrec.error)&&satrec.error!==0))continue;
+   out.push({name:String(row.OBJECT_NAME||row.OBJECT_ID||("NORAD "+noradId)),noradId,satrec,omm:row,source});
+  }catch{}
+ }
+ return out;
+}
 function addObjs(recs,source){
  let added=0;
  for(const r of recs){
-  const id=idOf(r),old=byId.get(id);
-  if(old){old.satrec=r.satrec;old.l1=r.l1;old.l2=r.l2;continue}
+  const id=idOf(r);if(!id||id==="UNKNOWN")continue;
+  const old=byId.get(id);
+  if(old){old.satrec=r.satrec;old.noradId=id;old.source=source;continue}
   if(objs.length>=MAXP)break;
   r.cat=cat(r.name,source);r.source=source;r.i=objs.length;
   new THREE.Color(COL[r.cat]).toArray(colr,r.i*3);
@@ -256,29 +285,68 @@ function addObjs(recs,source){
 }
 async function getTLE(g){
  try{const r=await fetch(`./data/${g}.tle`);if(r.ok){const t=await r.text();if(t.trim()&&!/^\s*</.test(t))return t}}catch{}
- if(g==="active"||g==="starlink")return null;           /* never pull the big files straight from CelesTrak */
  const k="tle_"+g;let c=null;
  try{c=JSON.parse(localStorage.getItem(k)||"null")}catch{}
- if(c&&Date.now()-c.t<72e5)return c.d;                   /* CelesTrak updates every 2 hours */
+ if(c&&Date.now()-c.t<72e5)return c.d;
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
  try{
-  const r=await fetch("https://celestrak.org/NORAD/elements/gp.php?GROUP="+g.toUpperCase()+"&FORMAT=TLE");
-  if(!r.ok)throw 0;
+  const r=await fetch("https://celestrak.org/NORAD/elements/gp.php?GROUP="+encodeURIComponent(g.toUpperCase())+"&FORMAT=TLE",{signal:controller.signal});
+  if(!r.ok)throw new Error("CelesTrak HTTP "+r.status);
   const d=await r.text();
-  if(d.trim()&&!/^\s*</.test(d)){try{localStorage.setItem(k,JSON.stringify({t:Date.now(),d}))}catch{}return d}
- }catch{}
+  if(d.trim()&&!/^\s*</.test(d)){
+   try{localStorage.setItem(k,JSON.stringify({t:Date.now(),d}))}catch{}
+   return d;
+  }
+ }catch(error){console.warn("TLE feed unavailable:",g,error)}
+ finally{clearTimeout(timer)}
  return c?c.d:null;
+}
+async function getOMM(g){
+ const key="orbital_omm_"+g,now=Date.now();
+ const memory=OMM_MEMORY.get(g);
+ if(memory&&now-memory.t<72e5)return memory.rows;
+ let cached=null;
+ try{cached=JSON.parse(localStorage.getItem(key)||"null")}catch{}
+ if(cached&&Array.isArray(cached.rows)&&now-cached.t<72e5){OMM_MEMORY.set(g,cached);return cached.rows}
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+ try{
+  const url="https://celestrak.org/NORAD/elements/gp.php?GROUP="+encodeURIComponent(g.toUpperCase())+"&FORMAT=JSON";
+  const r=await fetch(url,{signal:controller.signal,cache:"no-store"});
+  if(!r.ok)throw new Error("CelesTrak OMM HTTP "+r.status);
+  const data=await r.json();
+  const rows=Array.isArray(data)?data:(data&&data.NORAD_CAT_ID?[data]:[]);
+  if(!rows.length)throw new Error("No OMM records returned");
+  const subset=rows.slice(0,OMM_CAPS[g]||1000),entry={t:Date.now(),rows:subset};
+  OMM_MEMORY.set(g,entry);
+  const packed=JSON.stringify(entry);
+  if(packed.length<3000000){try{localStorage.setItem(key,packed)}catch{}}
+  return subset;
+ }finally{clearTimeout(timer)}
 }
 async function loadData(){
  $("liveLabel").textContent="CONNECTING";
- let ok=0,added=0;
+ let ok=0,added=0,failed=[];
  for(const g of GROUPS){
-  const t=await getTLE(g);if(!t)continue;
-  let recs=parseTLE(t);if(g==="active")recs=recs.slice(0,3500);
-  if(recs.length){ok++;added+=addObjs(recs,g)}
+  const t=await getTLE(g);if(!t){failed.push(g);continue}
+  const recs=parseTLE(t).slice(0,GROUP_CAPS[g]||1000);
+  if(recs.length){ok++;added+=addObjs(recs,g)}else failed.push(g);
  }
- $("updated").textContent=ok?new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"None";
- $("source").textContent=ok?`${ok}/${GROUPS.length} feeds · +${added} new`:"No data. Add ./data/*.tle files";
- $("liveLabel").textContent=ok?(ok<GROUPS.length?"PARTIAL DATA":"DATA CONNECTED"):"OFFLINE";
+ let ommOk=0;
+ const ommResults=await Promise.allSettled(OMM_GROUPS.map(async g=>({group:g,records:parseOMM(await getOMM(g),g)})));
+ for(let i=0;i<ommResults.length;i++){
+  const result=ommResults[i];
+  if(result.status==="fulfilled"){
+   const {group,records}=result.value;
+   ommOk++;added+=addObjs(records.slice(0,OMM_CAPS[group]),group);
+  }else{
+   failed.push(OMM_GROUPS[i]+" OMM");
+   console.warn("OMM catalog unavailable:",OMM_GROUPS[i],result.reason);
+  }
+ }
+ const available=ok+ommOk,totalFeeds=GROUPS.length+OMM_GROUPS.length;
+ $("updated").textContent=available?new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"None";
+ $("source").textContent=available?`TLE ${ok}/${GROUPS.length} · OMM ${ommOk}/${OMM_GROUPS.length} · ${objs.length.toLocaleString()} objects${failed.length?" · some feeds unavailable":""}`:"No data. Check ./data/*.tle or public CelesTrak access";
+ $("liveLabel").textContent=available?(available===totalFeeds?"DATA CONNECTED":"PARTIAL DATA"):"OFFLINE";
  update();renderList();renderFavs();
  if(!sel&&objs.length)select(issObj||objs[0],true);
 }
@@ -397,6 +465,52 @@ async function loadWeather(){
   $("wxStatus").textContent=c[0]+" · model time "+(n.time||"n/a")+" · model guidance, not an official warning service";
  }catch(e){$("wxStatus").textContent="Weather unavailable: "+e.message}
 }
+/* ---------- local monthly climate anomaly vs 1991–2020 ERA5 baseline ---------- */
+const average=values=>values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null;
+const isoDate=(y,m,d)=>`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+async function loadClimate(){
+ const c=city(),now=new Date();
+ const lastMonth=new Date(now.getFullYear(),now.getMonth(),0);
+ const year=lastMonth.getFullYear(),month=lastMonth.getMonth()+1,days=lastMonth.getDate();
+ const monthText=String(month).padStart(2,"0"),periodLabel=new Intl.DateTimeFormat("en-US",{month:"long",year:"numeric"}).format(lastMonth);
+ $("climateStatus").textContent=`Calculating ${c[0]} · ${periodLabel} against the 1991–2020 baseline…`;
+ try{
+  const common={latitude:String(c[2]),longitude:String(c[3]),daily:"temperature_2m_mean",timezone:c[1],models:"era5",temperature_unit:"celsius"};
+  const recentQuery=new URLSearchParams({...common,start_date:isoDate(year,month,1),end_date:isoDate(year,month,days)});
+  const baselineQuery=new URLSearchParams({...common,start_date:"1991-01-01",end_date:"2020-12-31"});
+  const [recent,baseline]=await Promise.all([
+   J("https://archive-api.open-meteo.com/v1/archive?"+recentQuery,35000),
+   J("https://archive-api.open-meteo.com/v1/archive?"+baselineQuery,35000)
+  ]);
+  const recentDates=recent.daily?.time||[],recentValues=recent.daily?.temperature_2m_mean||[];
+  const recentPairs=recentDates.map((date,i)=>({date,value:recentValues[i]})).filter(x=>x.value!=null&&Number.isFinite(+x.value));
+  const recentTemps=recentPairs.map(x=>+x.value);
+  const sampledDays=new Set(recentPairs.map(x=>String(x.date).slice(8,10)));
+  const byYear=new Map(),baseDates=baseline.daily?.time||[],baseValues=baseline.daily?.temperature_2m_mean||[];
+  for(let i=0;i<baseDates.length;i++){
+   if(String(baseDates[i]).slice(5,7)!==monthText||!sampledDays.has(String(baseDates[i]).slice(8,10))||baseValues[i]==null||!Number.isFinite(+baseValues[i]))continue;
+   const yr=String(baseDates[i]).slice(0,4);
+   if(!byYear.has(yr))byYear.set(yr,[]);
+   byYear.get(yr).push(+baseValues[i]);
+  }
+  const yearlyMeans=[...byYear.values()].map(average).filter(Number.isFinite);
+  const recentMean=average(recentTemps),baselineMean=average(yearlyMeans);
+  if(recentTemps.length<Math.min(20,Math.ceil(days*.7)))throw new Error("ERA5 has not published enough daily values for a reliable monthly comparison yet. Try again later.");
+  if(recentMean==null||baselineMean==null||yearlyMeans.length<25)throw new Error("Historical baseline coverage was insufficient for this month.");
+  const anomaly=recentMean-baselineMean,sign=anomaly>0?"+":"",descriptor=anomaly>0.05?"Above the historical baseline":anomaly< -0.05?"Below the historical baseline":"Close to the historical baseline";
+  M("climateBox",[
+   ["RECENT MONTH MEAN",nf(recentMean)+" °C",`${periodLabel} · ${recentTemps.length}/${days} available daily values`],
+   ["1991–2020 BASELINE",nf(baselineMean)+" °C",`${yearlyMeans.length} yearly ${periodLabel.split(" ")[0]} averages · ERA5`],
+   ["TEMPERATURE ANOMALY",sign+nf(anomaly)+" °C",descriptor]
+  ]);
+  $("climateStatus").textContent=`${c[0]} · ${periodLabel} · ERA5 reanalysis · ${recentTemps.length}/${days} daily values`;
+  $("climateNote").textContent=`The recent monthly mean uses ${recentTemps.length} available daily mean temperatures. The baseline uses the same calendar days in each year and averages the ${yearlyMeans.length} yearly means for ${periodLabel.split(" ")[0]} from 1991–2020. This is a local monthly comparison, not a global climate indicator. ERA5 historical data is updated with a delay. If some days are not published yet, the calculation compares only the dates available in both the recent month and all baseline years.`;
+ }catch(error){
+  M("climateBox",[["RECENT MONTH MEAN","—","Historical data unavailable"],["1991–2020 BASELINE","—","Historical data unavailable"],["TEMPERATURE ANOMALY","—","Cannot calculate without both periods"]]);
+  $("climateStatus").textContent="Climate data unavailable: "+error.message;
+ }
+}
+
 const aqiCat=v=>!Number.isFinite(+v)?"Not reported":v<=50?"Good":v<=100?"Moderate":v<=150?"Unhealthy for sensitive groups":v<=200?"Unhealthy":v<=300?"Very unhealthy":"Hazardous";
 async function loadAir(){
  const c=city();$("airStatus").textContent="Fetching "+c[0]+"…";
@@ -452,10 +566,10 @@ $("spin").onclick=()=>{spin=!spin;$("spin").textContent="AUTO ROTATE: "+(spin?"O
 $("showCities").onchange=e=>cityGroup.visible=e.target.checked;
 $("showTrail").onchange=e=>{showTrail=e.target.checked;sel&&drawTrail(sel)};
 document.querySelectorAll("[data-layer]").forEach(b=>b.onchange=()=>{b.checked?hidden.delete(b.dataset.layer):hidden.add(b.dataset.layer);update()});
-$("refreshWx").onclick=loadSpace;$("refreshEv").onclick=loadEvents;
+$("refreshWx").onclick=loadSpace;$("refreshClimate").onclick=loadClimate;$("refreshEv").onclick=loadEvents;
 $("region").onchange=loadOcean;
 $("city").innerHTML=CITIES.map((c,i)=>`<option value="${i}">${c[0]}</option>`).join("");
-$("city").onchange=()=>{loadWeather();loadAir()};
+$("city").onchange=()=>{loadWeather();loadAir();loadClimate()};
 $("sheetHead").addEventListener("click",e=>{if(innerWidth<=1000&&!e.target.closest("label"))$("satellites").classList.toggle("open")});
 $("upload").onchange=async e=>{
  const f=e.target.files[0];if(!f)return;
@@ -464,11 +578,16 @@ $("upload").onchange=async e=>{
  if(!n)alert("No valid standard TLE records found.");e.target.value="";
 };
 
-clocks();update();loadData();loadSpace();loadWeather();loadAir();loadOcean();loadEvents();
+clocks();update();loadData();loadSpace();loadWeather();loadClimate();loadAir();loadOcean();loadEvents();
 setInterval(clocks,1000);
 setInterval(update,1000);
 setInterval(renderList,30000);
 setInterval(loadData,2*60*60*1000);
 setInterval(loadSpace,10*60*1000);
+setInterval(loadClimate,24*60*60*1000);
 setInterval(()=>{loadWeather();loadAir();loadOcean();loadEvents()},15*60*1000);
 </script></body></html>
+
+
+
+
